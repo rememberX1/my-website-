@@ -3,801 +3,1029 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jee-chapter-tracker</title>
+  <title>JEE Chapter Tracker</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    :root {
+    :root, [data-theme="light"] {
       --bg: #f7f6f2;
+      --surface: #fbfbf9;
+      --surface-2: #f1eee9;
       --card: #ffffff;
-      --card-2: #f2efe8;
-      --text: #1f1f1f;
-      --muted: #6f6a63;
-      --border: #ddd7cf;
-      --primary: #0f766e;
-      --primary-2: #134e4a;
-      --success: #2e7d32;
-      --warn: #b7791f;
-      --danger: #b91c1c;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --text: #1f1f1b;
+      --muted: #66665f;
+      --border: #d7d3cb;
+      --primary: #0d6b6f;
+      --primary-hover: #0a5558;
+      --success: #2f7d32;
+      --warning: #a66300;
+      --danger: #9b2c5a;
+      --shadow: 0 8px 24px rgba(25, 25, 20, 0.08);
       --radius: 18px;
     }
 
     [data-theme="dark"] {
-      --bg: #121212;
-      --card: #1c1c1c;
-      --card-2: #252525;
-      --text: #f3f3f3;
-      --muted: #b6b6b6;
-      --border: #333333;
-      --primary: #2dd4bf;
-      --primary-2: #14b8a6;
-      --success: #4ade80;
-      --warn: #fbbf24;
-      --danger: #f87171;
-      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --bg: #151513;
+      --surface: #1d1d1a;
+      --surface-2: #262521;
+      --card: #20201c;
+      --text: #eceae4;
+      --muted: #a8a59d;
+      --border: #383731;
+      --primary: #4ea1a7;
+      --primary-hover: #6eb8bd;
+      --success: #76b37a;
+      --warning: #e0a23b;
+      --danger: #d56a9a;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(180deg, var(--bg), var(--surface));
       color: var(--text);
-      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button, input, select {
+      font: inherit;
     }
 
     .app {
-      max-width: 1300px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 20px;
     }
 
     .topbar {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
     }
 
     .logo {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      background: var(--primary);
+      color: white;
       display: grid;
       place-items: center;
-      color: white;
-      font-weight: 800;
       box-shadow: var(--shadow);
+      font-weight: 800;
     }
 
     .brand h1 {
-      font-size: 1.6rem;
-      font-weight: 800;
+      margin: 0;
+      font-size: 1.35rem;
     }
 
     .brand p {
+      margin: 2px 0 0;
       color: var(--muted);
       font-size: 0.95rem;
     }
 
-    .toolbar {
+    .actions {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
     }
 
-    button, select {
+    .btn {
       border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font: inherit;
+      padding: 12px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      min-height: 44px;
     }
 
-    button {
-      cursor: pointer;
-      font-weight: 600;
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
     }
 
     .btn-primary {
       background: var(--primary);
-      color: white;
+      color: #fff;
       border-color: transparent;
     }
 
-    .hero {
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .login-wrap {
+      min-height: calc(100vh - 40px);
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
+      place-items: center;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 2rem;
+    }
+
+    .login-card p {
+      margin-top: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .field label {
+      font-weight: 600;
+      font-size: 0.96rem;
+    }
+
+    .field input,
+    .field select {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 14px 15px;
+      border-radius: 14px;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 107, 111, 0.12);
+    }
+
+    .row {
+      display: grid;
       gap: 18px;
-      margin-bottom: 22px;
+      grid-template-columns: repeat(12, 1fr);
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 22px;
+      padding: 18px;
       box-shadow: var(--shadow);
     }
 
-    .hero-card {
-      padding: 22px;
-    }
-
-    .hero-card h2 {
-      font-size: 1.4rem;
-      margin-bottom: 8px;
-    }
-
-    .hero-card p {
-      color: var(--muted);
-      margin-bottom: 18px;
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.92rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
     .stat {
-      padding: 18px;
-      border-radius: 16px;
-      background: var(--card-2);
-      border: 1px solid var(--border);
+      grid-column: span 3;
     }
 
-    .stat .label {
-      font-size: 0.92rem;
+    .stat h3 {
+      margin: 0 0 6px;
       color: var(--muted);
-      margin-bottom: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
 
-    .stat .value {
-      font-size: 1.7rem;
-      font-weight: 800;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 18px;
-    }
-
-    .sidebar, .main {
-      min-width: 0;
+    .stat strong {
+      font-size: 1.8rem;
     }
 
     .panel {
-      padding: 18px;
+      grid-column: span 12;
+    }
+
+    .panel-half {
+      grid-column: span 6;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .section-title h2, .section-title h3 {
+      margin: 0;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .subject-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-bottom: 18px;
     }
 
-    .panel h3 {
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-    }
-
-    .subject-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .subject-btn {
-      width: 100%;
-      text-align: left;
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--card);
+    .tab {
+      padding: 10px 14px;
+      border-radius: 999px;
       border: 1px solid var(--border);
-      color: var(--text);
+      background: var(--surface);
+      cursor: pointer;
+      font-weight: 600;
     }
 
-    .subject-btn.active {
+    .tab.active {
       background: var(--primary);
       color: white;
       border-color: transparent;
     }
 
-    .subject-meta {
-      font-size: 0.86rem;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .recommend {
-      padding: 16px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(15,118,110,0.12), rgba(15,118,110,0.05));
-      border: 1px solid var(--border);
-    }
-
-    .recommend small {
-      color: var(--muted);
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .recommend h4 {
-      font-size: 1.05rem;
-      margin-bottom: 6px;
-    }
-
-    .recommend p {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .progressbar {
-      height: 10px;
-      width: 100%;
-      border-radius: 999px;
-      background: var(--card-2);
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .progressbar > span {
-      display: block;
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--primary-2));
-      border-radius: inherit;
-    }
-
-    .chapter-header {
-      padding: 18px 18px 0;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .chapter-header h3 {
-      font-size: 1.2rem;
-    }
-
-    .chapter-header p {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
     .chapter-list {
-      padding: 18px;
       display: grid;
       gap: 12px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 4px;
     }
 
-    .chapter-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 14px;
-      align-items: center;
-      padding: 14px;
+    .chapter {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      background: var(--card);
+      padding: 14px;
     }
 
-    .chapter-item.done {
-      opacity: 0.82;
-    }
-
-    .sequence {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: var(--card-2);
-      font-weight: 800;
-      border: 1px solid var(--border);
-    }
-
-    .chapter-title {
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .chapter-sub {
-      font-size: 0.9rem;
-      color: var(--muted);
+    .chapter-left {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+      flex: 1;
+    }
+
+    .chapter input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+    }
+
+    .chapter h4 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .chapter p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 0.78rem;
+      padding: 6px 10px;
+      font-size: 0.8rem;
       font-weight: 700;
-      border: 1px solid var(--border);
-      background: var(--card-2);
+      white-space: nowrap;
     }
 
-    .badge.next {
-      background: rgba(15,118,110,0.12);
-      color: var(--primary-2);
-      border-color: rgba(15,118,110,0.18);
+    .badge-next {
+      background: rgba(13, 107, 111, 0.12);
+      color: var(--primary);
     }
 
-    .badge.done {
-      background: rgba(46,125,50,0.12);
+    .badge-done {
+      background: rgba(47, 125, 50, 0.12);
       color: var(--success);
-      border-color: rgba(46,125,50,0.18);
     }
 
-    .badge.class11 {
-      color: #1d4ed8;
+    .muted {
+      color: var(--muted);
     }
 
-    .badge.class12 {
-      color: #9333ea;
+    .next-card {
+      display: grid;
+      gap: 12px;
     }
 
-    .chapter-actions input {
-      width: 22px;
-      height: 22px;
-      cursor: pointer;
+    .next-box {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--surface), var(--surface-2));
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .next-box h4 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .next-box p {
+      margin: 0;
+      color: var(--muted);
     }
 
     .footer-note {
+      margin-top: 14px;
       color: var(--muted);
-      font-size: 0.9rem;
-      padding: 6px 2px 0;
+      font-size: 0.92rem;
+      line-height: 1.6;
     }
 
-    @media (max-width: 980px) {
-      .hero,
-      .layout {
-        grid-template-columns: 1fr;
-      }
+    .user-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
 
-      .filter-grid,
-      .stats {
-        grid-template-columns: 1fr;
-      }
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .hidden { display: none !important; }
+
+    .small {
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 960px) {
+      .stat { grid-column: span 6; }
+      .panel-half { grid-column: span 12; }
+    }
+
+    @media (max-width: 640px) {
+      .app { padding: 14px; }
+      .login-card { padding: 20px; border-radius: 22px; }
+      .stat { grid-column: span 12; }
+      .chapter { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">JT</div>
-        <div>
-          <h1>JEE Chapter Tracker</h1>
-          <p>Track completed chapters, class-wise filtering, and next best chapter in sequence.</p>
+    <section id="loginScreen" class="screen active login-wrap">
+      <div class="login-card">
+        <h2>JEE Chapter Tracker</h2>
+        <p>
+          Track Class 11, Class 12, or Dropper syllabus progress, get the next recommended chapter,
+          and save your progress online with Firebase.
+        </p>
+
+        <div class="field">
+          <label for="studentName">Your Name</label>
+          <input id="studentName" type="text" placeholder="Enter your full name" />
         </div>
-      </div>
 
-      <div class="toolbar">
-        <button id="themeToggle">Toggle Theme</button>
-        <button id="markDemo">Load Demo Progress</button>
-        <button id="resetBtn">Reset Progress</button>
-      </div>
-    </header>
-
-    <section class="hero">
-      <div class="card hero-card">
-        <h2>Select Class</h2>
-        <p>Choose whether you are in Class 11, Class 12, or a Dropper. The app will show chapters accordingly.</p>
-
-        <div class="filter-grid">
-          <div class="field">
-            <label for="classSelect">Class</label>
-            <select id="classSelect">
-              <option value="11">Class 11</option>
-              <option value="12">Class 12</option>
-              <option value="dropper">Dropper</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="subjectSelect">Subject</label>
-            <select id="subjectSelect">
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Mathematics">Mathematics</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="sortSelect">View</label>
-            <select id="sortSelect">
-              <option value="sequence">Sequence Order</option>
-              <option value="remaining">Incomplete First</option>
-              <option value="completed">Completed First</option>
-            </select>
-          </div>
+        <div class="field">
+          <label for="studentClassLogin">Select Class</label>
+          <select id="studentClassLogin">
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+            <option value="dropper">Dropper</option>
+          </select>
         </div>
-      </div>
 
-      <div class="card hero-card">
-        <h2>Overall Progress</h2>
-        <div class="stats">
-          <div class="stat">
-            <div class="label">Visible Chapters</div>
-            <div class="value" id="visibleCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="label">Completed</div>
-            <div class="value" id="completedCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="label">Remaining</div>
-            <div class="value" id="remainingCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="label">Progress</div>
-            <div class="value" id="percentCount">0%</div>
-          </div>
+        <div class="actions" style="margin-top: 18px;">
+          <button class="btn btn-primary" id="continueGuestBtn">Continue as Guest</button>
+          <button class="btn" id="googleLoginBtn">Google Login</button>
+          <button class="btn btn-ghost" id="themeBtnLogin">Toggle Theme</button>
         </div>
+
+        <p class="footer-note">
+          To use Google login and online saving, add your Firebase project keys in the config section inside this file,
+          enable Google sign-in in Firebase Authentication, and enable Realtime Database. Firebase web authentication
+          supports Google sign-in, and Realtime Database stores app data as synced JSON. [web:93][page:0]
+        </p>
+
+        <div id="loginStatus" class="footer-note"></div>
       </div>
     </section>
 
-    <section class="layout">
-      <aside class="sidebar">
-        <div class="card panel">
-          <h3>Subjects</h3>
-          <div class="subject-list" id="subjectButtons"></div>
-        </div>
-
-        <div class="card panel">
-          <h3>Next Chapter</h3>
-          <div class="recommend" id="recommendBox">
-            <small>Recommendation</small>
-            <h4>No chapter selected yet</h4>
-            <p>Complete chapters in order and the next one will appear here.</p>
-            <div class="progressbar"><span style="width:0%"></span></div>
+    <section id="appScreen" class="screen">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo">J</div>
+          <div>
+            <h1>JEE Progress Dashboard</h1>
+            <p>Track chapters, class-wise progress, and next study sequence.</p>
           </div>
         </div>
-      </aside>
 
-      <main class="main">
-        <div class="card">
-          <div class="chapter-header">
+        <div class="actions">
+          <button class="btn btn-ghost" id="themeBtnApp">Toggle Theme</button>
+          <button class="btn" id="saveBtn">Save Progress</button>
+          <button class="btn" id="loadBtn">Load Progress</button>
+          <button class="btn" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <div class="user-row" style="margin-bottom: 18px;">
+        <span class="pill">Name: <strong id="displayName">-</strong></span>
+        <span class="pill">Login: <strong id="displayAuthType">Guest</strong></span>
+        <span class="pill">Class: <strong id="displayClass">11</strong></span>
+      </div>
+
+      <div class="row">
+        <div class="card stat">
+          <h3>Total chapters shown</h3>
+          <strong id="totalChapters">0</strong>
+        </div>
+        <div class="card stat">
+          <h3>Completed</h3>
+          <strong id="completedChapters">0</strong>
+        </div>
+        <div class="card stat">
+          <h3>Remaining</h3>
+          <strong id="remainingChapters">0</strong>
+        </div>
+        <div class="card stat">
+          <h3>Progress</h3>
+          <strong id="progressPercent">0%</strong>
+        </div>
+
+        <div class="card panel">
+          <div class="section-title">
             <div>
-              <h3 id="chapterTitle">Physics Chapters</h3>
-              <p id="chapterSub">Class-wise filtered chapter list.</p>
+              <h2>Select Class</h2>
+              <div class="muted small">11th shows only 11th chapters, 12th shows only 12th chapters, Dropper shows all chapters.</div>
+            </div>
+            <div class="filters">
+              <select id="classSelector">
+                <option value="11">Class 11</option>
+                <option value="12">Class 12</option>
+                <option value="dropper">Dropper</option>
+              </select>
             </div>
           </div>
-          <div class="chapter-list" id="chapterList"></div>
+
+          <div class="subject-tabs" id="subjectTabs"></div>
         </div>
-        <div class="footer-note">
-          Sequence order follows a logical chapter-by-chapter study flow, while class filters separate Class 11 and Class 12 topics and combine them for droppers. [web:44][web:4]
+
+        <div class="card panel-half">
+          <div class="section-title">
+            <h3>Chapters</h3>
+            <div class="muted small">Mark chapters completed to update sequence.</div>
+          </div>
+          <div id="chapterList" class="chapter-list"></div>
         </div>
-      </main>
+
+        <div class="card panel-half next-card">
+          <div class="section-title">
+            <h3>What to do next</h3>
+            <div class="muted small">Recommended from your selected class and subject.</div>
+          </div>
+
+          <div class="next-box">
+            <h4 id="nextChapterTitle">No chapter selected yet</h4>
+            <p id="nextChapterMeta">Start marking progress to get recommendations.</p>
+          </div>
+
+          <div class="next-box">
+            <h4>Study sequence</h4>
+            <p id="sequenceText">The ordered list will appear here.</p>
+          </div>
+
+          <div class="next-box">
+            <h4>Firebase status</h4>
+            <p id="firebaseStatus">Firebase not checked yet.</p>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 
-  <script>
-    const data = {
-      Physics: [
-        { name: "Units and Dimensions", classLevel: 11, sequence: 1, completed: false },
-        { name: "Motion in One Dimension", classLevel: 11, sequence: 2, completed: false },
-        { name: "Motion in Two Dimensions", classLevel: 11, sequence: 3, completed: false },
-        { name: "Laws of Motion", classLevel: 11, sequence: 4, completed: false },
-        { name: "Work, Energy and Power", classLevel: 11, sequence: 5, completed: false },
-        { name: "System of Particles and Rotational Motion", classLevel: 11, sequence: 6, completed: false },
-        { name: "Gravitation", classLevel: 11, sequence: 7, completed: false },
-        { name: "Mechanical Properties of Solids", classLevel: 11, sequence: 8, completed: false },
-        { name: "Mechanical Properties of Fluids", classLevel: 11, sequence: 9, completed: false },
-        { name: "Thermal Properties of Matter", classLevel: 11, sequence: 10, completed: false },
-        { name: "Thermodynamics", classLevel: 11, sequence: 11, completed: false },
-        { name: "Kinetic Theory of Gases", classLevel: 11, sequence: 12, completed: false },
-        { name: "Oscillations", classLevel: 11, sequence: 13, completed: false },
-        { name: "Waves", classLevel: 11, sequence: 14, completed: false },
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-        { name: "Electric Charges and Fields", classLevel: 12, sequence: 15, completed: false },
-        { name: "Electrostatic Potential and Capacitance", classLevel: 12, sequence: 16, completed: false },
-        { name: "Current Electricity", classLevel: 12, sequence: 17, completed: false },
-        { name: "Moving Charges and Magnetism", classLevel: 12, sequence: 18, completed: false },
-        { name: "Magnetism and Matter", classLevel: 12, sequence: 19, completed: false },
-        { name: "Electromagnetic Induction", classLevel: 12, sequence: 20, completed: false },
-        { name: "Alternating Current", classLevel: 12, sequence: 21, completed: false },
-        { name: "Electromagnetic Waves", classLevel: 12, sequence: 22, completed: false },
-        { name: "Ray Optics and Optical Instruments", classLevel: 12, sequence: 23, completed: false },
-        { name: "Wave Optics", classLevel: 12, sequence: 24, completed: false },
-        { name: "Dual Nature of Radiation and Matter", classLevel: 12, sequence: 25, completed: false },
-        { name: "Atoms", classLevel: 12, sequence: 26, completed: false },
-        { name: "Nuclei", classLevel: 12, sequence: 27, completed: false },
-        { name: "Semiconductor Electronics", classLevel: 12, sequence: 28, completed: false }
+    const firebaseConfig = {
+      apiKey: "PASTE_YOUR_API_KEY",
+      authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://PASTE_YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
+      messagingSenderId: "PASTE_YOUR_SENDER_ID",
+      appId: "PASTE_YOUR_APP_ID"
+    };
+
+    let firebaseReady = true;
+    let app = null;
+    let auth = null;
+    let db = null;
+    let provider = null;
+
+    try {
+      const looksConfigured =
+        firebaseConfig.apiKey &&
+        !firebaseConfig.apiKey.includes("PASTE_YOUR") &&
+        firebaseConfig.projectId &&
+        !firebaseConfig.projectId.includes("PASTE_YOUR");
+
+      if (!looksConfigured) {
+        firebaseReady = false;
+      } else {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getDatabase(app);
+        provider = new GoogleAuthProvider();
+      }
+    } catch (err) {
+      firebaseReady = false;
+      console.error(err);
+    }
+
+    const syllabus = {
+      physics: [
+        { id: "phy11-1", name: "Units and Measurements", classLevel: "11", sequence: 1 },
+        { id: "phy11-2", name: "Kinematics", classLevel: "11", sequence: 2 },
+        { id: "phy11-3", name: "Laws of Motion", classLevel: "11", sequence: 3 },
+        { id: "phy11-4", name: "Work, Energy and Power", classLevel: "11", sequence: 4 },
+        { id: "phy11-5", name: "System of Particles and Rotational Motion", classLevel: "11", sequence: 5 },
+        { id: "phy11-6", name: "Gravitation", classLevel: "11", sequence: 6 },
+        { id: "phy11-7", name: "Properties of Solids and Liquids", classLevel: "11", sequence: 7 },
+        { id: "phy11-8", name: "Thermodynamics", classLevel: "11", sequence: 8 },
+        { id: "phy11-9", name: "Kinetic Theory of Gases", classLevel: "11", sequence: 9 },
+        { id: "phy11-10", name: "Oscillations and Waves", classLevel: "11", sequence: 10 },
+
+        { id: "phy12-1", name: "Electrostatics", classLevel: "12", sequence: 11 },
+        { id: "phy12-2", name: "Current Electricity", classLevel: "12", sequence: 12 },
+        { id: "phy12-3", name: "Magnetic Effects of Current and Magnetism", classLevel: "12", sequence: 13 },
+        { id: "phy12-4", name: "Electromagnetic Induction and Alternating Current", classLevel: "12", sequence: 14 },
+        { id: "phy12-5", name: "Electromagnetic Waves", classLevel: "12", sequence: 15 },
+        { id: "phy12-6", name: "Optics", classLevel: "12", sequence: 16 },
+        { id: "phy12-7", name: "Dual Nature of Matter and Radiation", classLevel: "12", sequence: 17 },
+        { id: "phy12-8", name: "Atoms and Nuclei", classLevel: "12", sequence: 18 },
+        { id: "phy12-9", name: "Electronic Devices", classLevel: "12", sequence: 19 },
+        { id: "phy12-10", name: "Experimental Skills", classLevel: "12", sequence: 20 }
       ],
+      chemistry: [
+        { id: "chem11-1", name: "Some Basic Concepts of Chemistry", classLevel: "11", sequence: 1 },
+        { id: "chem11-2", name: "Atomic Structure", classLevel: "11", sequence: 2 },
+        { id: "chem11-3", name: "Chemical Bonding and Molecular Structure", classLevel: "11", sequence: 3 },
+        { id: "chem11-4", name: "States of Matter", classLevel: "11", sequence: 4 },
+        { id: "chem11-5", name: "Thermodynamics", classLevel: "11", sequence: 5 },
+        { id: "chem11-6", name: "Equilibrium", classLevel: "11", sequence: 6 },
+        { id: "chem11-7", name: "Redox Reactions", classLevel: "11", sequence: 7 },
+        { id: "chem11-8", name: "Hydrogen", classLevel: "11", sequence: 8 },
+        { id: "chem11-9", name: "The s-Block Element", classLevel: "11", sequence: 9 },
+        { id: "chem11-10", name: "Some p-Block Elements", classLevel: "11", sequence: 10 },
+        { id: "chem11-11", name: "Organic Chemistry - Basic Principles and Techniques", classLevel: "11", sequence: 11 },
+        { id: "chem11-12", name: "Hydrocarbons", classLevel: "11", sequence: 12 },
+        { id: "chem11-13", name: "Environmental Chemistry", classLevel: "11", sequence: 13 },
 
-      Chemistry: [
-        { name: "Some Basic Concepts of Chemistry", classLevel: 11, sequence: 1, completed: false },
-        { name: "Atomic Structure", classLevel: 11, sequence: 2, completed: false },
-        { name: "Classification of Elements and Periodicity", classLevel: 11, sequence: 3, completed: false },
-        { name: "Chemical Bonding and Molecular Structure", classLevel: 11, sequence: 4, completed: false },
-        { name: "States of Matter", classLevel: 11, sequence: 5, completed: false },
-        { name: "Thermodynamics", classLevel: 11, sequence: 6, completed: false },
-        { name: "Equilibrium", classLevel: 11, sequence: 7, completed: false },
-        { name: "Redox Reactions", classLevel: 11, sequence: 8, completed: false },
-        { name: "Hydrogen", classLevel: 11, sequence: 9, completed: false },
-        { name: "s-Block Elements", classLevel: 11, sequence: 10, completed: false },
-        { name: "p-Block Elements (Class 11 Portion)", classLevel: 11, sequence: 11, completed: false },
-        { name: "Organic Chemistry - Basic Principles and Techniques", classLevel: 11, sequence: 12, completed: false },
-        { name: "Hydrocarbons", classLevel: 11, sequence: 13, completed: false },
-        { name: "Environmental Chemistry", classLevel: 11, sequence: 14, completed: false },
-
-        { name: "Solid State", classLevel: 12, sequence: 15, completed: false },
-        { name: "Solutions", classLevel: 12, sequence: 16, completed: false },
-        { name: "Electrochemistry", classLevel: 12, sequence: 17, completed: false },
-        { name: "Chemical Kinetics", classLevel: 12, sequence: 18, completed: false },
-        { name: "Surface Chemistry", classLevel: 12, sequence: 19, completed: false },
-        { name: "General Principles and Processes of Isolation of Elements", classLevel: 12, sequence: 20, completed: false },
-        { name: "p-Block Elements (Class 12 Portion)", classLevel: 12, sequence: 21, completed: false },
-        { name: "d and f Block Elements", classLevel: 12, sequence: 22, completed: false },
-        { name: "Coordination Compounds", classLevel: 12, sequence: 23, completed: false },
-        { name: "Haloalkanes and Haloarenes", classLevel: 12, sequence: 24, completed: false },
-        { name: "Alcohols, Phenols and Ethers", classLevel: 12, sequence: 25, completed: false },
-        { name: "Aldehydes, Ketones and Carboxylic Acids", classLevel: 12, sequence: 26, completed: false },
-        { name: "Amines", classLevel: 12, sequence: 27, completed: false },
-        { name: "Biomolecules", classLevel: 12, sequence: 28, completed: false },
-        { name: "Polymers", classLevel: 12, sequence: 29, completed: false },
-        { name: "Chemistry in Everyday Life", classLevel: 12, sequence: 30, completed: false }
+        { id: "chem12-1", name: "Solid State", classLevel: "12", sequence: 14 },
+        { id: "chem12-2", name: "Solutions", classLevel: "12", sequence: 15 },
+        { id: "chem12-3", name: "Electrochemistry", classLevel: "12", sequence: 16 },
+        { id: "chem12-4", name: "Chemical Kinetics", classLevel: "12", sequence: 17 },
+        { id: "chem12-5", name: "Surface Chemistry", classLevel: "12", sequence: 18 },
+        { id: "chem12-6", name: "General Principles and Processes of Isolation of Elements", classLevel: "12", sequence: 19 },
+        { id: "chem12-7", name: "p-Block Elements", classLevel: "12", sequence: 20 },
+        { id: "chem12-8", name: "d and f Block Elements", classLevel: "12", sequence: 21 },
+        { id: "chem12-9", name: "Coordination Compounds", classLevel: "12", sequence: 22 },
+        { id: "chem12-10", name: "Haloalkanes and Haloarenes", classLevel: "12", sequence: 23 },
+        { id: "chem12-11", name: "Alcohols, Phenols and Ethers", classLevel: "12", sequence: 24 },
+        { id: "chem12-12", name: "Aldehydes, Ketones and Carboxylic Acids", classLevel: "12", sequence: 25 },
+        { id: "chem12-13", name: "Organic Compounds Containing Nitrogen", classLevel: "12", sequence: 26 },
+        { id: "chem12-14", name: "Biomolecules", classLevel: "12", sequence: 27 },
+        { id: "chem12-15", name: "Polymers", classLevel: "12", sequence: 28 },
+        { id: "chem12-16", name: "Chemistry in Everyday Life", classLevel: "12", sequence: 29 }
       ],
+      mathematics: [
+        { id: "math11-1", name: "Sets, Relations and Functions", classLevel: "11", sequence: 1 },
+        { id: "math11-2", name: "Complex Numbers and Quadratic Equations", classLevel: "11", sequence: 2 },
+        { id: "math11-3", name: "Matrices and Determinants (foundation)", classLevel: "11", sequence: 3 },
+        { id: "math11-4", name: "Permutations and Combinations", classLevel: "11", sequence: 4 },
+        { id: "math11-5", name: "Binomial Theorem", classLevel: "11", sequence: 5 },
+        { id: "math11-6", name: "Sequences and Series", classLevel: "11", sequence: 6 },
+        { id: "math11-7", name: "Straight Lines", classLevel: "11", sequence: 7 },
+        { id: "math11-8", name: "Conic Sections", classLevel: "11", sequence: 8 },
+        { id: "math11-9", name: "Introduction to Three Dimensional Geometry", classLevel: "11", sequence: 9 },
+        { id: "math11-10", name: "Limits and Derivatives", classLevel: "11", sequence: 10 },
+        { id: "math11-11", name: "Statistics", classLevel: "11", sequence: 11 },
+        { id: "math11-12", name: "Probability", classLevel: "11", sequence: 12 },
+        { id: "math11-13", name: "Trigonometry", classLevel: "11", sequence: 13 },
 
-      Mathematics: [
-        { name: "Sets", classLevel: 11, sequence: 1, completed: false },
-        { name: "Relations and Functions", classLevel: 11, sequence: 2, completed: false },
-        { name: "Trigonometric Functions", classLevel: 11, sequence: 3, completed: false },
-        { name: "Complex Numbers and Quadratic Equations", classLevel: 11, sequence: 4, completed: false },
-        { name: "Linear Inequalities", classLevel: 11, sequence: 5, completed: false },
-        { name: "Permutations and Combinations", classLevel: 11, sequence: 6, completed: false },
-        { name: "Binomial Theorem", classLevel: 11, sequence: 7, completed: false },
-        { name: "Sequence and Series", classLevel: 11, sequence: 8, completed: false },
-        { name: "Straight Lines", classLevel: 11, sequence: 9, completed: false },
-        { name: "Conic Sections", classLevel: 11, sequence: 10, completed: false },
-        { name: "Introduction to Three Dimensional Geometry", classLevel: 11, sequence: 11, completed: false },
-        { name: "Limits and Derivatives", classLevel: 11, sequence: 12, completed: false },
-        { name: "Statistics", classLevel: 11, sequence: 13, completed: false },
-        { name: "Probability", classLevel: 11, sequence: 14, completed: false },
-
-        { name: "Inverse Trigonometric Functions", classLevel: 12, sequence: 15, completed: false },
-        { name: "Matrices", classLevel: 12, sequence: 16, completed: false },
-        { name: "Determinants", classLevel: 12, sequence: 17, completed: false },
-        { name: "Continuity and Differentiability", classLevel: 12, sequence: 18, completed: false },
-        { name: "Application of Derivatives", classLevel: 12, sequence: 19, completed: false },
-        { name: "Integrals", classLevel: 12, sequence: 20, completed: false },
-        { name: "Application of Integrals", classLevel: 12, sequence: 21, completed: false },
-        { name: "Differential Equations", classLevel: 12, sequence: 22, completed: false },
-        { name: "Vector Algebra", classLevel: 12, sequence: 23, completed: false },
-        { name: "Three Dimensional Geometry", classLevel: 12, sequence: 24, completed: false },
-        { name: "Linear Programming", classLevel: 12, sequence: 25, completed: false },
-        { name: "Probability (Advanced)", classLevel: 12, sequence: 26, completed: false }
+        { id: "math12-1", name: "Matrices", classLevel: "12", sequence: 14 },
+        { id: "math12-2", name: "Determinants", classLevel: "12", sequence: 15 },
+        { id: "math12-3", name: "Inverse Trigonometric Functions", classLevel: "12", sequence: 16 },
+        { id: "math12-4", name: "Continuity and Differentiability", classLevel: "12", sequence: 17 },
+        { id: "math12-5", name: "Application of Derivatives", classLevel: "12", sequence: 18 },
+        { id: "math12-6", name: "Integrals", classLevel: "12", sequence: 19 },
+        { id: "math12-7", name: "Differential Equations", classLevel: "12", sequence: 20 },
+        { id: "math12-8", name: "Vector Algebra", classLevel: "12", sequence: 21 },
+        { id: "math12-9", name: "Three Dimensional Geometry", classLevel: "12", sequence: 22 },
+        { id: "math12-10", name: "Linear Programming", classLevel: "12", sequence: 23 },
+        { id: "math12-11", name: "Probability", classLevel: "12", sequence: 24 }
       ]
     };
 
-    const classSelect = document.getElementById("classSelect");
-    const subjectSelect = document.getElementById("subjectSelect");
-    const sortSelect = document.getElementById("sortSelect");
+    const state = {
+      name: "",
+      classMode: "11",
+      subject: "physics",
+      completed: {},
+      authUser: null,
+      authType: "Guest"
+    };
+
+    const loginScreen = document.getElementById("loginScreen");
+    const appScreen = document.getElementById("appScreen");
+
+    const studentName = document.getElementById("studentName");
+    const studentClassLogin = document.getElementById("studentClassLogin");
+    const continueGuestBtn = document.getElementById("continueGuestBtn");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const loginStatus = document.getElementById("loginStatus");
+
+    const themeBtnLogin = document.getElementById("themeBtnLogin");
+    const themeBtnApp = document.getElementById("themeBtnApp");
+
+    const displayName = document.getElementById("displayName");
+    const displayAuthType = document.getElementById("displayAuthType");
+    const displayClass = document.getElementById("displayClass");
+    const classSelector = document.getElementById("classSelector");
+    const subjectTabs = document.getElementById("subjectTabs");
     const chapterList = document.getElementById("chapterList");
-    const chapterTitle = document.getElementById("chapterTitle");
-    const chapterSub = document.getElementById("chapterSub");
-    const visibleCount = document.getElementById("visibleCount");
-    const completedCount = document.getElementById("completedCount");
-    const remainingCount = document.getElementById("remainingCount");
-    const percentCount = document.getElementById("percentCount");
-    const recommendBox = document.getElementById("recommendBox");
-    const subjectButtons = document.getElementById("subjectButtons");
-    const themeToggle = document.getElementById("themeToggle");
-    const resetBtn = document.getElementById("resetBtn");
-    const markDemo = document.getElementById("markDemo");
 
-    let currentTheme = "light";
+    const totalChapters = document.getElementById("totalChapters");
+    const completedChapters = document.getElementById("completedChapters");
+    const remainingChapters = document.getElementById("remainingChapters");
+    const progressPercent = document.getElementById("progressPercent");
 
-    function setTheme() {
-      document.documentElement.setAttribute("data-theme", currentTheme);
+    const nextChapterTitle = document.getElementById("nextChapterTitle");
+    const nextChapterMeta = document.getElementById("nextChapterMeta");
+    const sequenceText = document.getElementById("sequenceText");
+    const firebaseStatus = document.getElementById("firebaseStatus");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const loadBtn = document.getElementById("loadBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function applyTheme(mode) {
+      document.documentElement.setAttribute("data-theme", mode);
     }
 
-    themeToggle.addEventListener("click", () => {
-      currentTheme = currentTheme === "light" ? "dark" : "light";
-      setTheme();
-    });
+    let currentTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    applyTheme(currentTheme);
 
-    function getFilteredChapters(subject) {
-      const mode = classSelect.value;
-      let chapters = data[subject];
-
-      if (mode === "11") {
-        chapters = chapters.filter(ch => ch.classLevel === 11);
-      } else if (mode === "12") {
-        chapters = chapters.filter(ch => ch.classLevel === 12);
-      }
-
-      const sortMode = sortSelect.value;
-
-      if (sortMode === "sequence") {
-        chapters = [...chapters].sort((a, b) => a.sequence - b.sequence);
-      } else if (sortMode === "remaining") {
-        chapters = [...chapters].sort((a, b) => Number(a.completed) - Number(b.completed) || a.sequence - b.sequence);
-      } else if (sortMode === "completed") {
-        chapters = [...chapters].sort((a, b) => Number(b.completed) - Number(a.completed) || a.sequence - b.sequence);
-      }
-
-      return chapters;
+    function toggleTheme() {
+      currentTheme = currentTheme === "dark" ? "light" : "dark";
+      applyTheme(currentTheme);
     }
 
-    function getVisibleAllSubjects() {
-      const subjects = ["Physics", "Chemistry", "Mathematics"];
-      return subjects.flatMap(subject => getFilteredChapters(subject));
+    themeBtnLogin.addEventListener("click", toggleTheme);
+    themeBtnApp.addEventListener("click", toggleTheme);
+
+    function showScreen(name) {
+      loginScreen.classList.remove("active");
+      appScreen.classList.remove("active");
+      if (name === "login") loginScreen.classList.add("active");
+      if (name === "app") appScreen.classList.add("active");
     }
 
-    function renderSubjects() {
-      const subjects = ["Physics", "Chemistry", "Mathematics"];
-      subjectButtons.innerHTML = "";
+    function normalizeName(name) {
+      return name.trim().replace(/\s+/g, " ");
+    }
 
-      subjects.forEach(subject => {
-        const chapters = getFilteredChapters(subject);
-        const done = chapters.filter(ch => ch.completed).length;
-        const total = chapters.length;
+    function getVisibleChapters(subject) {
+      const all = syllabus[subject];
+      if (state.classMode === "dropper") return [...all].sort((a, b) => a.sequence - b.sequence);
+      return all
+        .filter(ch => ch.classLevel === state.classMode)
+        .sort((a, b) => a.sequence - b.sequence);
+    }
 
+    function isCompleted(chapterId) {
+      return Boolean(state.completed[chapterId]);
+    }
+
+    function getNextChapter(subject) {
+      const visible = getVisibleChapters(subject);
+      return visible.find(ch => !isCompleted(ch.id)) || null;
+    }
+
+    function renderSubjectTabs() {
+      const subjects = [
+        { key: "physics", label: "Physics" },
+        { key: "chemistry", label: "Chemistry" },
+        { key: "mathematics", label: "Mathematics" }
+      ];
+
+      subjectTabs.innerHTML = "";
+      subjects.forEach(item => {
         const btn = document.createElement("button");
-        btn.className = "subject-btn" + (subjectSelect.value === subject ? " active" : "");
-        btn.innerHTML = `
-          <div><strong>${subject}</strong></div>
-          <div class="subject-meta">${done}/${total} completed</div>
-        `;
+        btn.className = "tab" + (state.subject === item.key ? " active" : "");
+        btn.textContent = item.label;
         btn.addEventListener("click", () => {
-          subjectSelect.value = subject;
-          render();
+          state.subject = item.key;
+          renderAll();
         });
-        subjectButtons.appendChild(btn);
+        subjectTabs.appendChild(btn);
+      });
+    }
+
+    function renderChapters() {
+      const visible = getVisibleChapters(state.subject);
+      const next = getNextChapter(state.subject);
+      chapterList.innerHTML = "";
+
+      visible.forEach(ch => {
+        const row = document.createElement("div");
+        row.className = "chapter";
+
+        const done = isCompleted(ch.id);
+
+        row.innerHTML = `
+          <div class="chapter-left">
+            <input type="checkbox" ${done ? "checked" : ""} aria-label="Mark ${ch.name} complete">
+            <div>
+              <h4>${ch.name}</h4>
+              <p>Class ${ch.classLevel} • Sequence ${ch.sequence}</p>
+            </div>
+          </div>
+          <div>
+            ${done
+              ? `<span class="badge badge-done">Completed</span>`
+              : next && next.id === ch.id
+                ? `<span class="badge badge-next">Next</span>`
+                : ``}
+          </div>
+        `;
+
+        const checkbox = row.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener("change", e => {
+          state.completed[ch.id] = e.target.checked;
+          renderAll();
+        });
+
+        chapterList.appendChild(row);
       });
     }
 
     function renderStats() {
-      const all = getVisibleAllSubjects();
-      const total = all.length;
-      const done = all.filter(ch => ch.completed).length;
-      const left = total - done;
+      const allVisible = Object.keys(syllabus).flatMap(subject => getVisibleChapters(subject));
+      const total = allVisible.length;
+      const done = allVisible.filter(ch => isCompleted(ch.id)).length;
+      const remaining = total - done;
       const percent = total ? Math.round((done / total) * 100) : 0;
 
-      visibleCount.textContent = total;
-      completedCount.textContent = done;
-      remainingCount.textContent = left;
-      percentCount.textContent = percent + "%";
+      totalChapters.textContent = total;
+      completedChapters.textContent = done;
+      remainingChapters.textContent = remaining;
+      progressPercent.textContent = percent + "%";
     }
 
-    function getNextChapter(subject) {
-      const chapters = getFilteredChapters(subject).sort((a, b) => a.sequence - b.sequence);
-      return chapters.find(ch => !ch.completed) || null;
-    }
+    function renderNext() {
+      const next = getNextChapter(state.subject);
+      const visible = getVisibleChapters(state.subject);
 
-    function renderRecommendation(subject) {
-      const chapters = getFilteredChapters(subject);
-      const total = chapters.length;
-      const done = chapters.filter(ch => ch.completed).length;
-      const percent = total ? Math.round((done / total) * 100) : 0;
-      const next = getNextChapter(subject);
-
-      if (!next) {
-        recommendBox.innerHTML = `
-          <small>Recommendation</small>
-          <h4>All visible chapters completed</h4>
-          <p>Great job. You have completed all chapters for the selected class mode in ${subject}.</p>
-          <div class="progressbar"><span style="width:${percent}%"></span></div>
-        `;
+      if (!visible.length) {
+        nextChapterTitle.textContent = "No chapters available";
+        nextChapterMeta.textContent = "Please check the selected class and subject.";
+        sequenceText.textContent = "No sequence available.";
         return;
       }
 
-      recommendBox.innerHTML = `
-        <small>Recommendation</small>
-        <h4>${next.name}</h4>
-        <p>Sequence ${next.sequence} • Class ${next.classLevel} • Best next chapter to continue in ${subject}.</p>
-        <div class="progressbar"><span style="width:${percent}%"></span></div>
-      `;
+      sequenceText.textContent = visible.map(ch => ch.name).join(" → ");
+
+      if (!next) {
+        nextChapterTitle.textContent = "All shown chapters completed";
+        nextChapterMeta.textContent = `You finished all visible ${state.subject} chapters for ${state.classMode === "dropper" ? "Dropper" : "Class " + state.classMode}.`;
+      } else {
+        nextChapterTitle.textContent = next.name;
+        nextChapterMeta.textContent = `${capitalize(state.subject)} • Class ${next.classLevel} • Sequence ${next.sequence}`;
+      }
     }
 
-    function renderChapters() {
-      const subject = subjectSelect.value;
-      const chapters = getFilteredChapters(subject);
-      const next = getNextChapter(subject);
-
-      chapterTitle.textContent = subject + " Chapters";
-      chapterSub.textContent =
-        classSelect.value === "dropper"
-          ? "Showing Class 11 + Class 12 combined chapter list for droppers."
-          : `Showing only Class ${classSelect.value} chapters.`;
-
-      chapterList.innerHTML = "";
-
-      chapters.forEach(ch => {
-        const item = document.createElement("div");
-        item.className = "chapter-item" + (ch.completed ? " done" : "");
-
-        const isNext = next && next.name === ch.name && !ch.completed;
-
-        item.innerHTML = `
-          <div class="sequence">${ch.sequence}</div>
-          <div>
-            <div class="chapter-title">${ch.name}</div>
-            <div class="chapter-sub">
-              <span class="badge ${ch.classLevel === 11 ? 'class11' : 'class12'}">Class ${ch.classLevel}</span>
-              ${ch.completed ? '<span class="badge done">Completed</span>' : ''}
-              ${isNext ? '<span class="badge next">Next</span>' : ''}
-            </div>
-          </div>
-          <div class="chapter-actions">
-            <input type="checkbox" ${ch.completed ? "checked" : ""} aria-label="Mark completed">
-          </div>
-        `;
-
-        const checkbox = item.querySelector("input");
-        checkbox.addEventListener("change", () => {
-          ch.completed = checkbox.checked;
-          render();
-        });
-
-        chapterList.appendChild(item);
-      });
+    function renderUserInfo() {
+      displayName.textContent = state.name || "-";
+      displayAuthType.textContent = state.authType;
+      displayClass.textContent = state.classMode === "dropper" ? "Dropper" : `Class ${state.classMode}`;
+      classSelector.value = state.classMode;
     }
 
-    function render() {
-      renderSubjects();
-      renderStats();
-      renderRecommendation(subjectSelect.value);
+    function renderFirebaseStatus() {
+      if (!firebaseReady) {
+        firebaseStatus.textContent = "Firebase config missing. App is running in guest mode only.";
+      } else if (state.authUser) {
+        firebaseStatus.textContent = `Connected as ${state.authUser.email || state.authUser.displayName || "Google user"}. Progress can be saved online.`;
+      } else {
+        firebaseStatus.textContent = "Firebase ready, but not logged in with Google. You can still use guest mode.";
+      }
+    }
+
+    function renderAll() {
+      renderUserInfo();
+      renderSubjectTabs();
       renderChapters();
+      renderStats();
+      renderNext();
+      renderFirebaseStatus();
     }
 
-    classSelect.addEventListener("change", render);
-    subjectSelect.addEventListener("change", render);
-    sortSelect.addEventListener("change", render);
+    function startApp() {
+      showScreen("app");
+      renderAll();
+    }
 
-    resetBtn.addEventListener("click", () => {
-      Object.values(data).forEach(subjectArr => {
-        subjectArr.forEach(ch => ch.completed = false);
+    continueGuestBtn.addEventListener("click", () => {
+      const name = normalizeName(studentName.value);
+      if (!name) {
+        loginStatus.textContent = "Please enter your name first.";
+        return;
+      }
+      state.name = name;
+      state.classMode = studentClassLogin.value;
+      state.authType = "Guest";
+      state.authUser = null;
+      startApp();
+    });
+
+    googleLoginBtn.addEventListener("click", async () => {
+      const name = normalizeName(studentName.value);
+      if (!name) {
+        loginStatus.textContent = "Please enter your name before Google login.";
+        return;
+      }
+
+      state.name = name;
+      state.classMode = studentClassLogin.value;
+
+      if (!firebaseReady) {
+        loginStatus.textContent = "Firebase is not configured yet. Add your Firebase keys first.";
+        return;
+      }
+
+      try {
+        const result = await signInWithPopup(auth, provider);
+        state.authUser = result.user;
+        state.authType = "Google";
+        loginStatus.textContent = "Google login successful.";
+        startApp();
+        await loadProgress();
+      } catch (error) {
+        console.error(error);
+        loginStatus.textContent = "Google login failed. Check Firebase Auth setup and authorized domain.";
+      }
+    });
+
+    classSelector.addEventListener("change", () => {
+      state.classMode = classSelector.value;
+      renderAll();
+    });
+
+    function capitalize(text) {
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function getProgressPayload() {
+      return {
+        name: state.name,
+        classMode: state.classMode,
+        subject: state.subject,
+        completed: state.completed,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function getUserPath() {
+      if (state.authUser?.uid) return `users/${state.authUser.uid}/progress`;
+      const fallbackKey = normalizeName(state.name).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+      return `guestUsers/${fallbackKey}/progress`;
+    }
+
+    async function saveProgress() {
+      if (!firebaseReady) {
+        alert("Firebase is not configured. Add config keys first.");
+        return;
+      }
+      try {
+        await set(ref(db, getUserPath()), getProgressPayload());
+        alert("Progress saved successfully.");
+        renderFirebaseStatus();
+      } catch (error) {
+        console.error(error);
+        alert("Could not save progress.");
+      }
+    }
+
+    async function loadProgress() {
+      if (!firebaseReady) {
+        alert("Firebase is not configured. Add config keys first.");
+        return;
+      }
+      try {
+        const snapshot = await get(ref(db, getUserPath()));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          state.name = data.name || state.name;
+          state.classMode = data.classMode || state.classMode;
+          state.subject = data.subject || state.subject;
+          state.completed = data.completed || {};
+          renderAll();
+          alert("Progress loaded successfully.");
+        } else {
+          alert("No saved progress found yet.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Could not load progress.");
+      }
+    }
+
+    saveBtn.addEventListener("click", saveProgress);
+    loadBtn.addEventListener("click", loadProgress);
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        if (firebaseReady && auth && state.authUser) {
+          await signOut(auth);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      state.authUser = null;
+      state.authType = "Guest";
+      state.subject = "physics";
+      showScreen("login");
+      renderAll();
+    });
+
+    if (firebaseReady && auth) {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          state.authUser = user;
+          state.authType = "Google";
+        } else {
+          state.authUser = null;
+          if (state.authType !== "Guest") state.authType = "Guest";
+        }
+        renderFirebaseStatus();
       });
-      render();
-    });
+    }
 
-    markDemo.addEventListener("click", () => {
-      data.Physics.forEach((ch, i) => ch.completed = i < 5);
-      data.Chemistry.forEach((ch, i) => ch.completed = i < 7);
-      data.Mathematics.forEach((ch, i) => ch.completed = i < 4);
-      render();
-    });
-
-    setTheme();
-    render();
+    renderAll();
   </script>
 </body>
 </html>
