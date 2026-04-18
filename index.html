@@ -1,526 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>JEE Chapter Tracker</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root, [data-theme="light"] {
-      --bg: #f7f6f2;
-      --surface: #fbfbf9;
-      --surface-2: #f1eee9;
-      --card: #ffffff;
-      --text: #1f1f1b;
-      --muted: #66665f;
-      --border: #d7d3cb;
-      --primary: #0d6b6f;
-      --primary-hover: #0a5558;
-      --success: #2f7d32;
-      --warning: #a66300;
-      --danger: #9b2c5a;
-      --shadow: 0 8px 24px rgba(25, 25, 20, 0.08);
-      --radius: 18px;
+    /* ── TOKENS ── */
+    :root {
+      --bg:        #f0f4ff;
+      --surface:   #ffffff;
+      --surface-2: #e2e8f0;
+      --card-bg:   rgba(255,255,255,0.65);
+      --card-border: rgba(255,255,255,0.3);
+      --text:      #0f172a;
+      --muted:     #64748b;
+      --border:    #cbd5e1;
+      --primary:   #3b82f6;
+      --primary2:  #06b6d4;
+      --success:   #22c55e;
+      --success2:  #4ade80;
+      --warning:   #f59e0b;
+      --danger:    #ef4444;
+      --shadow:    0 8px 32px rgba(15,23,42,0.1);
+      --radius:    20px;
     }
-
     [data-theme="dark"] {
-      --bg: #151513;
-      --surface: #1d1d1a;
-      --surface-2: #262521;
-      --card: #20201c;
-      --text: #eceae4;
-      --muted: #a8a59d;
-      --border: #383731;
-      --primary: #4ea1a7;
-      --primary-hover: #6eb8bd;
-      --success: #76b37a;
-      --warning: #e0a23b;
-      --danger: #d56a9a;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      --bg:        #0f172a;
+      --surface:   #1e293b;
+      --surface-2: #334155;
+      --card-bg:   rgba(30,41,59,0.65);
+      --card-border: rgba(255,255,255,0.08);
+      --text:      #f1f5f9;
+      --muted:     #94a3b8;
+      --border:    #334155;
+      --primary:   #60a5fa;
+      --primary2:  #22d3ee;
+      --success:   #4ade80;
+      --shadow:    0 8px 32px rgba(0,0,0,0.35);
     }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: "Inter", sans-serif;
-      background: linear-gradient(180deg, var(--bg), var(--surface));
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
+    button, input, select { font: inherit; }
 
-    button, input, select {
-      font: inherit;
+    /* ── LOADER ── */
+    #loader {
+      position: fixed; inset: 0;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: grid; place-items: center;
+      z-index: 9999;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      transition: opacity 0.5s ease;
     }
+    #loader.hidden { opacity: 0; pointer-events: none; }
 
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
 
-    .topbar {
-      display: flex;
-      gap: 12px;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--primary);
-      color: white;
-      display: grid;
-      place-items: center;
-      box-shadow: var(--shadow);
-      font-weight: 800;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 1.35rem;
-    }
-
-    .brand p {
-      margin: 2px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .btn {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 12px 16px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: 0.2s ease;
-      min-height: 44px;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-ghost {
-      background: transparent;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
+    /* ═══════════════════════════════════════
+       LOGIN SCREEN
+    ═══════════════════════════════════════ */
     .login-wrap {
-      min-height: calc(100vh - 40px);
-      display: grid;
-      place-items: center;
+      min-height: 100vh;
+      display: grid; place-items: center;
+      padding: 24px 16px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
     }
-
     .login-card {
-      width: 100%;
-      max-width: 560px;
-      background: var(--card);
-      border: 1px solid var(--border);
+      width: 100%; max-width: 520px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 28px;
-      padding: 28px;
-      box-shadow: var(--shadow);
+      padding: 36px 32px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
     }
-
+    .login-logo {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: grid; place-items: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      color: white;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(59,130,246,0.4);
+    }
     .login-card h2 {
-      margin-top: 0;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.9rem;
+      color: #f1f5f9;
       margin-bottom: 8px;
-      font-size: 2rem;
     }
-
-    .login-card p {
-      margin-top: 0;
-      color: var(--muted);
-      line-height: 1.6;
+    .login-card > p {
+      color: #94a3b8;
+      line-height: 1.65;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
     }
-
-    .field {
-      display: grid;
-      gap: 8px;
-      margin: 18px 0;
-    }
-
-    .field label {
-      font-weight: 600;
-      font-size: 0.96rem;
-    }
-
-    .field input,
-    .field select {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      padding: 14px 15px;
+    .field { display: grid; gap: 8px; margin: 16px 0; }
+    .field label { font-weight: 600; font-size: 0.9rem; color: #94a3b8; }
+    .field input, .field select {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.07);
+      color: #f1f5f9;
+      padding: 13px 15px;
       border-radius: 14px;
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(13, 107, 111, 0.12);
+    .field input:focus, .field select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
     }
+    .field select option { background: #1e293b; }
+    .login-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    #loginStatus { margin-top: 14px; color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
+    .footer-note { margin-top: 14px; color: #64748b; font-size: 0.85rem; line-height: 1.6; }
 
-    .row {
-      display: grid;
-      gap: 18px;
-      grid-template-columns: repeat(12, 1fr);
+    /* ═══════════════════════════════════════
+       APP SCREEN
+    ═══════════════════════════════════════ */
+    .app { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 22px;
     }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: grid; place-items: center;
+      font-family: 'Syne', sans-serif; font-size: 1.2rem;
+      color: white; box-shadow: 0 6px 20px rgba(59,130,246,0.35);
+    }
+    .brand-text h1 { font-family: 'Syne', sans-serif; font-size: 1.3rem; }
+    .brand-text p  { color: var(--muted); font-size: 0.88rem; margin-top: 2px; }
+    .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+    /* HERO */
+    .hero {
+      border-radius: 24px;
+      padding: 30px 28px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      color: white;
+      box-shadow: 0 12px 48px rgba(59,130,246,0.35);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -50px; right: -50px;
+      width: 220px; height: 220px;
+      background: rgba(255,255,255,0.07); border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; bottom: -30px; left: 30%;
+      width: 150px; height: 150px;
+      background: rgba(255,255,255,0.05); border-radius: 50%;
+    }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem,3.5vw,1.9rem); margin-bottom: 6px; }
+    .hero p  { opacity: 0.88; font-size: 0.95rem; }
+
+    /* USER PILLS */
+    .user-row {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      align-items: center; margin-bottom: 18px;
+    }
+    .pill {
+      padding: 7px 13px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 0.88rem; color: var(--muted);
+    }
+    .pill strong { color: var(--text); }
+
+    /* CARDS */
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 18px;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
       box-shadow: var(--shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.14); }
+
+    /* GRID */
+    .row { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); }
+    .col-3  { grid-column: span 3; }
+    .col-6  { grid-column: span 6; }
+    .col-12 { grid-column: span 12; }
+
+    @media (max-width: 960px) {
+      .col-3  { grid-column: span 6; }
+      .col-6  { grid-column: span 12; }
+    }
+    @media (max-width: 600px) {
+      .col-3  { grid-column: span 12; }
+      .app    { padding: 14px 14px 60px; }
     }
 
-    .stat {
-      grid-column: span 3;
-    }
-
+    /* STAT CARDS */
+    .stat { text-align: center; }
     .stat h3 {
-      margin: 0 0 6px;
-      color: var(--muted);
-      font-size: 0.92rem;
-      font-weight: 600;
+      font-size: 0.78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .stat strong { font-family: 'Syne', sans-serif; font-size: 1.75rem; }
+
+    /* PROGRESS BAR */
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.82rem; color: var(--muted); margin-bottom: 10px;
+    }
+    .progress-bar {
+      width: 100%; height: 12px;
+      background: var(--surface-2); border-radius: 999px; overflow: hidden;
+    }
+    #progressFill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--success2));
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
     }
 
-    .stat strong {
-      font-size: 1.8rem;
+    /* MOTIVATION BOX */
+    .motivation-box {
+      border-radius: 16px; padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.07));
+      border: 1px solid rgba(34,197,94,0.2);
+      margin-top: 12px;
     }
-
-    .panel {
-      grid-column: span 12;
+    .motivation-box h4 {
+      font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--success); margin-bottom: 5px;
     }
+    .motivation-box p { font-size: 0.95rem; font-weight: 500; color: var(--text); }
 
-    .panel-half {
-      grid-column: span 6;
+    /* SECTION TITLES */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
     }
+    .section-head h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; }
+    .section-head .hint { color: var(--muted); font-size: 0.82rem; }
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .section-title h2, .section-title h3 {
-      margin: 0;
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .subject-tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
+    /* SUBJECT TABS */
+    .subject-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
     .tab {
-      padding: 10px 14px;
-      border-radius: 999px;
+      padding: 9px 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface);
+      cursor: pointer; font-weight: 600; font-size: 0.88rem;
+      color: var(--text); transition: all 0.2s ease;
+    }
+    .tab:hover { border-color: var(--primary); color: var(--primary); }
+    .tab.active { background: var(--primary); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+    /* CLASS SELECT */
+    .class-select-wrap { display: flex; align-items: center; gap: 10px; }
+    .class-select-wrap label { font-size: 0.88rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+    select.styled {
       border: 1px solid var(--border);
       background: var(--surface);
-      cursor: pointer;
-      font-weight: 600;
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 12px; outline: none;
+      cursor: pointer; font-size: 0.88rem;
+      transition: border-color 0.2s;
     }
+    select.styled:focus { border-color: var(--primary); }
 
-    .tab.active {
-      background: var(--primary);
-      color: white;
-      border-color: transparent;
-    }
-
-    .chapter-list {
-      display: grid;
-      gap: 12px;
-      max-height: 560px;
-      overflow: auto;
-      padding-right: 4px;
-    }
+    /* CHAPTER LIST */
+    .chapter-list { display: grid; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
+    .chapter-list::-webkit-scrollbar { width: 5px; }
+    .chapter-list::-webkit-scrollbar-track { background: transparent; }
+    .chapter-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
 
     .chapter {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+      display: flex; align-items: flex-start; justify-content: space-between;
       gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 13px 15px;
+      transition: border-color 0.2s, transform 0.2s, background 0.2s;
     }
+    .chapter:hover { border-color: var(--primary); transform: translateX(3px); }
+    .chapter.done { opacity: 0.6; }
+    .chapter.done h4 { text-decoration: line-through; }
 
-    .chapter-left {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      flex: 1;
-    }
+    .chapter-left { display: flex; gap: 12px; align-items: flex-start; flex: 1; }
+    .chapter input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
+    .chapter h4 { font-size: 0.95rem; margin-bottom: 4px; }
+    .chapter p  { font-size: 0.82rem; color: var(--muted); }
 
-    .chapter input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      margin-top: 2px;
-    }
-
-    .chapter h4 {
-      margin: 0 0 6px;
-      font-size: 1rem;
-    }
-
-    .chapter p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
+    /* BADGES */
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 0.8rem;
-      font-weight: 700;
+      display: inline-flex; align-items: center;
+      border-radius: 999px; padding: 5px 11px;
+      font-size: 0.75rem; font-weight: 700;
       white-space: nowrap;
     }
+    .badge-next { background: rgba(59,130,246,0.12); color: var(--primary); }
+    .badge-done { background: rgba(34,197,94,0.12); color: var(--success); }
+    .badge-high   { background: rgba(239,68,68,0.12);  color: var(--danger); }
+    .badge-medium { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .badge-low    { background: rgba(34,197,94,0.12);  color: var(--success); }
 
-    .badge-next {
-      background: rgba(13, 107, 111, 0.12);
-      color: var(--primary);
-    }
-
-    .badge-done {
-      background: rgba(47, 125, 50, 0.12);
-      color: var(--success);
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .next-card {
-      display: grid;
-      gap: 12px;
-    }
-
+    /* NEXT / SEQUENCE BOXES */
+    .next-grid { display: grid; gap: 12px; }
     .next-box {
       border: 1px solid var(--border);
       background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border-radius: 18px;
-      padding: 18px;
+      border-radius: 16px; padding: 16px 18px;
     }
-
-    .next-box h4 {
-      margin: 0 0 8px;
-      font-size: 1.15rem;
+    .next-box h4 { font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 6px; }
+    .next-box p  { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+    .next-box .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 6px;
     }
+    .dot-green { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .dot-blue  { background: var(--primary); box-shadow: 0 0 6px var(--primary); }
+    .dot-red   { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
 
-    .next-box p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .footer-note {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.6;
-    }
-
-    .user-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .pill {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--surface);
+    /* BUTTONS */
+    .btn {
       border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+      padding: 10px 16px; border-radius: 12px;
+      cursor: pointer; font-weight: 600; font-size: 0.88rem;
+      transition: all 0.2s ease; white-space: nowrap;
     }
-
-    .hidden { display: none !important; }
-
-    .small {
-      font-size: 0.88rem;
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: white; border-color: transparent;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.3);
     }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.45); }
+    .btn-ghost { background: transparent; }
+    .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border-color: rgba(239,68,68,0.2); }
 
-    @media (max-width: 960px) {
-      .stat { grid-column: span 6; }
-      .panel-half { grid-column: span 12; }
+    /* STREAK FLAME ANIMATION */
+    @keyframes flicker {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.8; transform: scale(1.08); }
     }
-
-    @media (max-width: 640px) {
-      .app { padding: 14px; }
-      .login-card { padding: 20px; border-radius: 22px; }
-      .stat { grid-column: span 12; }
-      .chapter { flex-direction: column; }
-    }
+    .streak-icon { display: inline-block; animation: flicker 1.6s ease-in-out infinite; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <section id="loginScreen" class="screen active login-wrap">
-      <div class="login-card">
-        <h2>JEE Chapter Tracker</h2>
-        <p>
-          Track Class 11, Class 12, or Dropper syllabus progress, get the next recommended chapter,
-          and save your progress online with Firebase.
-        </p>
 
-        <div class="field">
-          <label for="studentName">Your Name</label>
-          <input id="studentName" type="text" placeholder="Enter your full name" />
-        </div>
+  <!-- ───────── LOADER ───────── -->
+  <div id="loader">🚀 Loading your dashboard...</div>
 
-        <div class="field">
-          <label for="studentClassLogin">Select Class</label>
-          <select id="studentClassLogin">
-            <option value="11">Class 11</option>
-            <option value="12">Class 12</option>
-            <option value="dropper">Dropper</option>
-          </select>
-        </div>
+  <!-- ═══════════════════════════════════
+       LOGIN SCREEN
+  ═══════════════════════════════════ -->
+  <section id="loginScreen" class="screen active login-wrap">
+    <div class="login-card">
+      <div class="login-logo">J</div>
+      <h2>JEE Chapter Tracker</h2>
+      <p>Track Class 11, Class 12, or Dropper syllabus with streaks, smart sequencing and online save via Firebase.</p>
 
-        <div class="actions" style="margin-top: 18px;">
-          <button class="btn btn-primary" id="continueGuestBtn">Continue as Guest</button>
-          <button class="btn" id="googleLoginBtn">Google Login</button>
-          <button class="btn btn-ghost" id="themeBtnLogin">Toggle Theme</button>
-        </div>
-
-        <p class="footer-note">
-          To use Google login and online saving, add your Firebase project keys in the config section inside this file,
-          enable Google sign-in in Firebase Authentication, and enable Realtime Database. Firebase web authentication
-          supports Google sign-in, and Realtime Database stores app data as synced JSON. [web:93][page:0]
-        </p>
-
-        <div id="loginStatus" class="footer-note"></div>
+      <div class="field">
+        <label for="studentName">Your Name</label>
+        <input id="studentName" type="text" placeholder="Enter your full name" />
       </div>
-    </section>
 
-    <section id="appScreen" class="screen">
+      <div class="field">
+        <label for="studentClassLogin">Select Class</label>
+        <select id="studentClassLogin">
+          <option value="11">Class 11</option>
+          <option value="12">Class 12</option>
+          <option value="dropper">Dropper (All chapters)</option>
+        </select>
+      </div>
+
+      <div class="login-actions">
+        <button class="btn btn-primary" id="continueGuestBtn">Continue as Guest</button>
+        <button class="btn" id="googleLoginBtn">🔐 Google Login</button>
+        <button class="btn btn-ghost" id="themeBtnLogin">🌙 Theme</button>
+      </div>
+
+      <p class="footer-note">
+        Google login saves progress to Firebase Realtime Database. Guest mode saves to your browser only.
+      </p>
+      <div id="loginStatus"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       APP SCREEN
+  ═══════════════════════════════════ -->
+  <section id="appScreen" class="screen">
+    <div class="app">
+
+      <!-- TOPBAR -->
       <div class="topbar">
         <div class="brand">
-          <div class="logo">J</div>
-          <div>
+          <div class="brand-logo">J</div>
+          <div class="brand-text">
             <h1>JEE Progress Dashboard</h1>
-            <p>Track chapters, class-wise progress, and next study sequence.</p>
+            <p>Track chapters, streaks, and next study sequence.</p>
           </div>
         </div>
-
-        <div class="actions">
-          <button class="btn btn-ghost" id="themeBtnApp">Toggle Theme</button>
-          <button class="btn" id="saveBtn">Save Progress</button>
-          <button class="btn" id="loadBtn">Load Progress</button>
-          <button class="btn" id="logoutBtn">Logout</button>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" id="themeBtnApp">🌙 Theme</button>
+          <button class="btn" id="saveBtn">💾 Save</button>
+          <button class="btn" id="loadBtn">📂 Load</button>
+          <button class="btn btn-danger" id="logoutBtn">Logout</button>
         </div>
       </div>
 
-      <div class="user-row" style="margin-bottom: 18px;">
-        <span class="pill">Name: <strong id="displayName">-</strong></span>
-        <span class="pill">Login: <strong id="displayAuthType">Guest</strong></span>
-        <span class="pill">Class: <strong id="displayClass">11</strong></span>
+      <!-- HERO -->
+      <div class="hero">
+        <h1>🚀 Crack JEE with Consistency</h1>
+        <p>Your personal study tracker with smart chapter sequencing and streak rewards.</p>
       </div>
 
-      <div class="row">
-        <div class="card stat">
-          <h3>Total chapters shown</h3>
-          <strong id="totalChapters">0</strong>
+      <!-- USER PILLS -->
+      <div class="user-row">
+        <span class="pill">👤 <strong id="displayName">-</strong></span>
+        <span class="pill">🔑 <strong id="displayAuthType">Guest</strong></span>
+        <span class="pill">📚 <strong id="displayClass">Class 11</strong></span>
+      </div>
+
+      <!-- STATS -->
+      <div class="row" style="margin-bottom:16px;">
+        <div class="card stat col-3">
+          <h3><span class="streak-icon">🔥</span> Streak</h3>
+          <strong id="streakCount">0 days</strong>
         </div>
-        <div class="card stat">
-          <h3>Completed</h3>
+        <div class="card stat col-3">
+          <h3>✅ Completed</h3>
           <strong id="completedChapters">0</strong>
         </div>
-        <div class="card stat">
-          <h3>Remaining</h3>
+        <div class="card stat col-3">
+          <h3>📖 Remaining</h3>
           <strong id="remainingChapters">0</strong>
         </div>
-        <div class="card stat">
-          <h3>Progress</h3>
+        <div class="card stat col-3">
+          <h3>🎯 Progress</h3>
           <strong id="progressPercent">0%</strong>
         </div>
+      </div>
 
-        <div class="card panel">
-          <div class="section-title">
-            <div>
-              <h2>Select Class</h2>
-              <div class="muted small">11th shows only 11th chapters, 12th shows only 12th chapters, Dropper shows all chapters.</div>
-            </div>
-            <div class="filters">
-              <select id="classSelector">
-                <option value="11">Class 11</option>
-                <option value="12">Class 12</option>
-                <option value="dropper">Dropper</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="subject-tabs" id="subjectTabs"></div>
+      <!-- PROGRESS BAR + MOTIVATION -->
+      <div class="card col-12" style="margin-bottom:16px;">
+        <div class="progress-label">
+          <span>Overall Progress</span>
+          <span id="progressLabel">0 / 0 chapters</span>
         </div>
+        <div class="progress-bar">
+          <div id="progressFill"></div>
+        </div>
+        <div class="motivation-box">
+          <h4>💬 Motivation</h4>
+          <p id="motivationText">Loading your motivation...</p>
+        </div>
+      </div>
 
-        <div class="card panel-half">
-          <div class="section-title">
-            <h3>Chapters</h3>
-            <div class="muted small">Mark chapters completed to update sequence.</div>
+      <!-- CLASS SELECTOR + SUBJECT TABS -->
+      <div class="card col-12" style="margin-bottom:16px;">
+        <div class="section-head">
+          <div>
+            <h3>Select Class &amp; Subject</h3>
+            <span class="hint">11th / 12th shows that class only. Dropper shows everything.</span>
+          </div>
+          <div class="class-select-wrap">
+            <label for="classSelector">Class:</label>
+            <select id="classSelector" class="styled">
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+              <option value="dropper">Dropper</option>
+            </select>
+          </div>
+        </div>
+        <div class="subject-tabs" id="subjectTabs"></div>
+      </div>
+
+      <!-- CHAPTERS + NEXT -->
+      <div class="row">
+        <div class="card col-6">
+          <div class="section-head">
+            <h3>📋 Chapters</h3>
+            <span class="hint">Check to mark completed.</span>
           </div>
           <div id="chapterList" class="chapter-list"></div>
         </div>
 
-        <div class="card panel-half next-card">
-          <div class="section-title">
-            <h3>What to do next</h3>
-            <div class="muted small">Recommended from your selected class and subject.</div>
+        <div class="card col-6 next-grid" style="align-content: start;">
+          <div class="section-head">
+            <h3>🎯 What to Study Next</h3>
+            <span class="hint">Based on your class &amp; subject.</span>
           </div>
 
           <div class="next-box">
@@ -529,505 +525,497 @@
           </div>
 
           <div class="next-box">
-            <h4>Study sequence</h4>
+            <h4>📜 Study Sequence</h4>
             <p id="sequenceText">The ordered list will appear here.</p>
           </div>
 
           <div class="next-box">
-            <h4>Firebase status</h4>
-            <p id="firebaseStatus">Firebase not checked yet.</p>
+            <h4>☁️ Firebase Status</h4>
+            <p id="firebaseStatus"><span class="status-dot dot-blue"></span>Checking...</p>
           </div>
+
+          <!-- MARK TODAY STUDIED -->
+          <button class="btn btn-primary" style="width:100%;" onclick="markTodayStudied()">
+            ✅ Mark Today as Studied
+          </button>
         </div>
       </div>
-    </section>
-  </div>
+
+    </div><!-- /.app -->
+  </section>
 
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import {
-    getDatabase,
-    ref,
-    set,
-    get
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+                                    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getDatabase, ref, set, get }
+                                    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
+  /* ── FIREBASE CONFIG ──────────────────────── */
   const firebaseConfig = {
-    apiKey: "AIzaSyCUS8TUAsB8clbUcupT9WWM7kiEVZ1PyYg",
-    authDomain: "bhaiyajee.firebaseapp.com",
-    databaseURL: "https://bhaiyajee-default-rtdb.firebaseio.com",
-    projectId: "bhaiyajee",
-    storageBucket: "bhaiyajee.firebasestorage.app",
+    apiKey:            "AIzaSyCUS8TUAsB8clbUcupT9WWM7kiEVZ1PyYg",
+    authDomain:        "bhaiyajee.firebaseapp.com",
+    databaseURL:       "https://bhaiyajee-default-rtdb.firebaseio.com",
+    projectId:         "bhaiyajee",
+    storageBucket:     "bhaiyajee.firebasestorage.app",
     messagingSenderId: "710710348899",
-    appId: "1:710710348899:web:30a96012a9c457afc4fc56",
-    measurementId: "G-0K6304K5K9"
+    appId:             "1:710710348899:web:30a96012a9c457afc4fc56"
   };
 
-  let firebaseReady = true;
-  let app = null;
-  let auth = null;
-  let db = null;
-  let provider = null;
-
+  let firebaseReady = false, app, auth, db, provider;
   try {
-    const looksConfigured =
-      firebaseConfig.apiKey &&
-      !firebaseConfig.apiKey.includes("PASTE_YOUR") &&
-      firebaseConfig.projectId &&
-      !firebaseConfig.projectId.includes("PASTE_YOUR");
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db   = getDatabase(app);
+    provider = new GoogleAuthProvider();
+    firebaseReady = true;
+  } catch (e) { console.error("Firebase init failed:", e); }
 
-    if (!looksConfigured) {
-      firebaseReady = false;
-    } else {
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getDatabase(app);
-      provider = new GoogleAuthProvider();
-    }
-  } catch (err) {
-    firebaseReady = false;
-    console.error(err);
+  /* ── SYLLABUS ────────────────────────────────────────────── */
+  const syllabus = {
+    physics: [
+      { id:"phy11-1",  name:"Units and Measurements",                             classLevel:"11", sequence:1  },
+      { id:"phy11-2",  name:"Kinematics",                                          classLevel:"11", sequence:2  },
+      { id:"phy11-3",  name:"Laws of Motion",                                     classLevel:"11", sequence:3  },
+      { id:"phy11-4",  name:"Work, Energy and Power",                             classLevel:"11", sequence:4  },
+      { id:"phy11-5",  name:"System of Particles and Rotational Motion",          classLevel:"11", sequence:5  },
+      { id:"phy11-6",  name:"Gravitation",                                         classLevel:"11", sequence:6  },
+      { id:"phy11-7",  name:"Properties of Solids and Liquids",                  classLevel:"11", sequence:7  },
+      { id:"phy11-8",  name:"Thermodynamics",                                     classLevel:"11", sequence:8  },
+      { id:"phy11-9",  name:"Kinetic Theory of Gases",                            classLevel:"11", sequence:9  },
+      { id:"phy11-10", name:"Oscillations and Waves",                             classLevel:"11", sequence:10 },
+      { id:"phy12-1",  name:"Electrostatics",                                     classLevel:"12", sequence:11 },
+      { id:"phy12-2",  name:"Current Electricity",                                classLevel:"12", sequence:12 },
+      { id:"phy12-3",  name:"Magnetic Effects of Current and Magnetism",          classLevel:"12", sequence:13 },
+      { id:"phy12-4",  name:"Electromagnetic Induction and Alternating Current",  classLevel:"12", sequence:14 },
+      { id:"phy12-5",  name:"Electromagnetic Waves",                              classLevel:"12", sequence:15 },
+      { id:"phy12-6",  name:"Optics",                                             classLevel:"12", sequence:16 },
+      { id:"phy12-7",  name:"Dual Nature of Matter and Radiation",               classLevel:"12", sequence:17 },
+      { id:"phy12-8",  name:"Atoms and Nuclei",                                   classLevel:"12", sequence:18 },
+      { id:"phy12-9",  name:"Electronic Devices",                                 classLevel:"12", sequence:19 },
+      { id:"phy12-10", name:"Experimental Skills",                                classLevel:"12", sequence:20 }
+    ],
+    chemistry: [
+      { id:"chem11-1",  name:"Some Basic Concepts of Chemistry",                  classLevel:"11", sequence:1  },
+      { id:"chem11-2",  name:"Atomic Structure",                                  classLevel:"11", sequence:2  },
+      { id:"chem11-3",  name:"Chemical Bonding and Molecular Structure",          classLevel:"11", sequence:3  },
+      { id:"chem11-4",  name:"States of Matter",                                  classLevel:"11", sequence:4  },
+      { id:"chem11-5",  name:"Thermodynamics",                                    classLevel:"11", sequence:5  },
+      { id:"chem11-6",  name:"Equilibrium",                                       classLevel:"11", sequence:6  },
+      { id:"chem11-7",  name:"Redox Reactions",                                   classLevel:"11", sequence:7  },
+      { id:"chem11-8",  name:"Hydrogen",                                          classLevel:"11", sequence:8  },
+      { id:"chem11-9",  name:"The s-Block Element",                               classLevel:"11", sequence:9  },
+      { id:"chem11-10", name:"Some p-Block Elements",                             classLevel:"11", sequence:10 },
+      { id:"chem11-11", name:"Organic Chemistry - Basic Principles & Techniques", classLevel:"11", sequence:11 },
+      { id:"chem11-12", name:"Hydrocarbons",                                      classLevel:"11", sequence:12 },
+      { id:"chem11-13", name:"Environmental Chemistry",                           classLevel:"11", sequence:13 },
+      { id:"chem12-1",  name:"Solid State",                                       classLevel:"12", sequence:14 },
+      { id:"chem12-2",  name:"Solutions",                                         classLevel:"12", sequence:15 },
+      { id:"chem12-3",  name:"Electrochemistry",                                  classLevel:"12", sequence:16 },
+      { id:"chem12-4",  name:"Chemical Kinetics",                                 classLevel:"12", sequence:17 },
+      { id:"chem12-5",  name:"Surface Chemistry",                                 classLevel:"12", sequence:18 },
+      { id:"chem12-6",  name:"General Principles and Processes of Isolation of Elements", classLevel:"12", sequence:19 },
+      { id:"chem12-7",  name:"p-Block Elements",                                  classLevel:"12", sequence:20 },
+      { id:"chem12-8",  name:"d and f Block Elements",                            classLevel:"12", sequence:21 },
+      { id:"chem12-9",  name:"Coordination Compounds",                            classLevel:"12", sequence:22 },
+      { id:"chem12-10", name:"Haloalkanes and Haloarenes",                        classLevel:"12", sequence:23 },
+      { id:"chem12-11", name:"Alcohols, Phenols and Ethers",                     classLevel:"12", sequence:24 },
+      { id:"chem12-12", name:"Aldehydes, Ketones and Carboxylic Acids",          classLevel:"12", sequence:25 },
+      { id:"chem12-13", name:"Organic Compounds Containing Nitrogen",            classLevel:"12", sequence:26 },
+      { id:"chem12-14", name:"Biomolecules",                                      classLevel:"12", sequence:27 },
+      { id:"chem12-15", name:"Polymers",                                          classLevel:"12", sequence:28 },
+      { id:"chem12-16", name:"Chemistry in Everyday Life",                        classLevel:"12", sequence:29 }
+    ],
+    mathematics: [
+      { id:"math11-1",  name:"Sets, Relations and Functions",                     classLevel:"11", sequence:1  },
+      { id:"math11-2",  name:"Complex Numbers and Quadratic Equations",           classLevel:"11", sequence:2  },
+      { id:"math11-3",  name:"Matrices and Determinants (foundation)",            classLevel:"11", sequence:3  },
+      { id:"math11-4",  name:"Permutations and Combinations",                     classLevel:"11", sequence:4  },
+      { id:"math11-5",  name:"Binomial Theorem",                                  classLevel:"11", sequence:5  },
+      { id:"math11-6",  name:"Sequences and Series",                              classLevel:"11", sequence:6  },
+      { id:"math11-7",  name:"Straight Lines",                                    classLevel:"11", sequence:7  },
+      { id:"math11-8",  name:"Conic Sections",                                    classLevel:"11", sequence:8  },
+      { id:"math11-9",  name:"Introduction to Three Dimensional Geometry",        classLevel:"11", sequence:9  },
+      { id:"math11-10", name:"Limits and Derivatives",                            classLevel:"11", sequence:10 },
+      { id:"math11-11", name:"Statistics",                                        classLevel:"11", sequence:11 },
+      { id:"math11-12", name:"Probability",                                       classLevel:"11", sequence:12 },
+      { id:"math11-13", name:"Trigonometry",                                      classLevel:"11", sequence:13 },
+      { id:"math12-1",  name:"Matrices",                                          classLevel:"12", sequence:14 },
+      { id:"math12-2",  name:"Determinants",                                      classLevel:"12", sequence:15 },
+      { id:"math12-3",  name:"Inverse Trigonometric Functions",                   classLevel:"12", sequence:16 },
+      { id:"math12-4",  name:"Continuity and Differentiability",                  classLevel:"12", sequence:17 },
+      { id:"math12-5",  name:"Application of Derivatives",                        classLevel:"12", sequence:18 },
+      { id:"math12-6",  name:"Integrals",                                         classLevel:"12", sequence:19 },
+      { id:"math12-7",  name:"Differential Equations",                            classLevel:"12", sequence:20 },
+      { id:"math12-8",  name:"Vector Algebra",                                    classLevel:"12", sequence:21 },
+      { id:"math12-9",  name:"Three Dimensional Geometry",                        classLevel:"12", sequence:22 },
+      { id:"math12-10", name:"Linear Programming",                                classLevel:"12", sequence:23 },
+      { id:"math12-11", name:"Probability (12th)",                                classLevel:"12", sequence:24 }
+    ]
+  };
+
+  /* ── STATE ────────────────────────────────────────────────── */
+  const state = {
+    name: "", classMode: "11", subject: "physics",
+    completed: {}, authUser: null, authType: "Guest"
+  };
+
+  /* ── DOM REFS ─────────────────────────────────────────────── */
+  const loginScreen       = document.getElementById("loginScreen");
+  const appScreen         = document.getElementById("appScreen");
+  const studentName       = document.getElementById("studentName");
+  const studentClassLogin = document.getElementById("studentClassLogin");
+  const continueGuestBtn  = document.getElementById("continueGuestBtn");
+  const googleLoginBtn    = document.getElementById("googleLoginBtn");
+  const loginStatus       = document.getElementById("loginStatus");
+  const themeBtnLogin     = document.getElementById("themeBtnLogin");
+  const themeBtnApp       = document.getElementById("themeBtnApp");
+  const displayName       = document.getElementById("displayName");
+  const displayAuthType   = document.getElementById("displayAuthType");
+  const displayClass      = document.getElementById("displayClass");
+  const classSelector     = document.getElementById("classSelector");
+  const subjectTabs       = document.getElementById("subjectTabs");
+  const chapterListEl     = document.getElementById("chapterList");
+  const completedEl       = document.getElementById("completedChapters");
+  const remainingEl       = document.getElementById("remainingChapters");
+  const progressPercentEl = document.getElementById("progressPercent");
+  const progressFill      = document.getElementById("progressFill");
+  const progressLabel     = document.getElementById("progressLabel");
+  const motivationText    = document.getElementById("motivationText");
+  const streakCount       = document.getElementById("streakCount");
+  const nextChapterTitle  = document.getElementById("nextChapterTitle");
+  const nextChapterMeta   = document.getElementById("nextChapterMeta");
+  const sequenceText      = document.getElementById("sequenceText");
+  const firebaseStatus    = document.getElementById("firebaseStatus");
+  const saveBtn           = document.getElementById("saveBtn");
+  const loadBtn           = document.getElementById("loadBtn");
+  const logoutBtn         = document.getElementById("logoutBtn");
+
+  /* ── THEME ───────────────────────────────────────────────── */
+  let currentTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+
+  function toggleTheme() {
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+  }
+  themeBtnLogin.addEventListener("click", toggleTheme);
+  themeBtnApp.addEventListener("click",   toggleTheme);
+
+  /* ── LOADER ──────────────────────────────────────────────── */
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      const loader = document.getElementById("loader");
+      loader.classList.add("hidden");
+      setTimeout(() => loader.style.display = "none", 500);
+    }, 800);
+  });
+
+  /* ── SCREEN SWITCH ───────────────────────────────────────── */
+  function showScreen(name) {
+    loginScreen.classList.remove("active");
+    appScreen.classList.remove("active");
+    if (name === "login") loginScreen.classList.add("active");
+    if (name === "app")   appScreen.classList.add("active");
   }
 
-
-    const syllabus = {
-      physics: [
-        { id: "phy11-1", name: "Units and Measurements", classLevel: "11", sequence: 1 },
-        { id: "phy11-2", name: "Kinematics", classLevel: "11", sequence: 2 },
-        { id: "phy11-3", name: "Laws of Motion", classLevel: "11", sequence: 3 },
-        { id: "phy11-4", name: "Work, Energy and Power", classLevel: "11", sequence: 4 },
-        { id: "phy11-5", name: "System of Particles and Rotational Motion", classLevel: "11", sequence: 5 },
-        { id: "phy11-6", name: "Gravitation", classLevel: "11", sequence: 6 },
-        { id: "phy11-7", name: "Properties of Solids and Liquids", classLevel: "11", sequence: 7 },
-        { id: "phy11-8", name: "Thermodynamics", classLevel: "11", sequence: 8 },
-        { id: "phy11-9", name: "Kinetic Theory of Gases", classLevel: "11", sequence: 9 },
-        { id: "phy11-10", name: "Oscillations and Waves", classLevel: "11", sequence: 10 },
-
-        { id: "phy12-1", name: "Electrostatics", classLevel: "12", sequence: 11 },
-        { id: "phy12-2", name: "Current Electricity", classLevel: "12", sequence: 12 },
-        { id: "phy12-3", name: "Magnetic Effects of Current and Magnetism", classLevel: "12", sequence: 13 },
-        { id: "phy12-4", name: "Electromagnetic Induction and Alternating Current", classLevel: "12", sequence: 14 },
-        { id: "phy12-5", name: "Electromagnetic Waves", classLevel: "12", sequence: 15 },
-        { id: "phy12-6", name: "Optics", classLevel: "12", sequence: 16 },
-        { id: "phy12-7", name: "Dual Nature of Matter and Radiation", classLevel: "12", sequence: 17 },
-        { id: "phy12-8", name: "Atoms and Nuclei", classLevel: "12", sequence: 18 },
-        { id: "phy12-9", name: "Electronic Devices", classLevel: "12", sequence: 19 },
-        { id: "phy12-10", name: "Experimental Skills", classLevel: "12", sequence: 20 }
-      ],
-      chemistry: [
-        { id: "chem11-1", name: "Some Basic Concepts of Chemistry", classLevel: "11", sequence: 1 },
-        { id: "chem11-2", name: "Atomic Structure", classLevel: "11", sequence: 2 },
-        { id: "chem11-3", name: "Chemical Bonding and Molecular Structure", classLevel: "11", sequence: 3 },
-        { id: "chem11-4", name: "States of Matter", classLevel: "11", sequence: 4 },
-        { id: "chem11-5", name: "Thermodynamics", classLevel: "11", sequence: 5 },
-        { id: "chem11-6", name: "Equilibrium", classLevel: "11", sequence: 6 },
-        { id: "chem11-7", name: "Redox Reactions", classLevel: "11", sequence: 7 },
-        { id: "chem11-8", name: "Hydrogen", classLevel: "11", sequence: 8 },
-        { id: "chem11-9", name: "The s-Block Element", classLevel: "11", sequence: 9 },
-        { id: "chem11-10", name: "Some p-Block Elements", classLevel: "11", sequence: 10 },
-        { id: "chem11-11", name: "Organic Chemistry - Basic Principles and Techniques", classLevel: "11", sequence: 11 },
-        { id: "chem11-12", name: "Hydrocarbons", classLevel: "11", sequence: 12 },
-        { id: "chem11-13", name: "Environmental Chemistry", classLevel: "11", sequence: 13 },
-
-        { id: "chem12-1", name: "Solid State", classLevel: "12", sequence: 14 },
-        { id: "chem12-2", name: "Solutions", classLevel: "12", sequence: 15 },
-        { id: "chem12-3", name: "Electrochemistry", classLevel: "12", sequence: 16 },
-        { id: "chem12-4", name: "Chemical Kinetics", classLevel: "12", sequence: 17 },
-        { id: "chem12-5", name: "Surface Chemistry", classLevel: "12", sequence: 18 },
-        { id: "chem12-6", name: "General Principles and Processes of Isolation of Elements", classLevel: "12", sequence: 19 },
-        { id: "chem12-7", name: "p-Block Elements", classLevel: "12", sequence: 20 },
-        { id: "chem12-8", name: "d and f Block Elements", classLevel: "12", sequence: 21 },
-        { id: "chem12-9", name: "Coordination Compounds", classLevel: "12", sequence: 22 },
-        { id: "chem12-10", name: "Haloalkanes and Haloarenes", classLevel: "12", sequence: 23 },
-        { id: "chem12-11", name: "Alcohols, Phenols and Ethers", classLevel: "12", sequence: 24 },
-        { id: "chem12-12", name: "Aldehydes, Ketones and Carboxylic Acids", classLevel: "12", sequence: 25 },
-        { id: "chem12-13", name: "Organic Compounds Containing Nitrogen", classLevel: "12", sequence: 26 },
-        { id: "chem12-14", name: "Biomolecules", classLevel: "12", sequence: 27 },
-        { id: "chem12-15", name: "Polymers", classLevel: "12", sequence: 28 },
-        { id: "chem12-16", name: "Chemistry in Everyday Life", classLevel: "12", sequence: 29 }
-      ],
-      mathematics: [
-        { id: "math11-1", name: "Sets, Relations and Functions", classLevel: "11", sequence: 1 },
-        { id: "math11-2", name: "Complex Numbers and Quadratic Equations", classLevel: "11", sequence: 2 },
-        { id: "math11-3", name: "Matrices and Determinants (foundation)", classLevel: "11", sequence: 3 },
-        { id: "math11-4", name: "Permutations and Combinations", classLevel: "11", sequence: 4 },
-        { id: "math11-5", name: "Binomial Theorem", classLevel: "11", sequence: 5 },
-        { id: "math11-6", name: "Sequences and Series", classLevel: "11", sequence: 6 },
-        { id: "math11-7", name: "Straight Lines", classLevel: "11", sequence: 7 },
-        { id: "math11-8", name: "Conic Sections", classLevel: "11", sequence: 8 },
-        { id: "math11-9", name: "Introduction to Three Dimensional Geometry", classLevel: "11", sequence: 9 },
-        { id: "math11-10", name: "Limits and Derivatives", classLevel: "11", sequence: 10 },
-        { id: "math11-11", name: "Statistics", classLevel: "11", sequence: 11 },
-        { id: "math11-12", name: "Probability", classLevel: "11", sequence: 12 },
-        { id: "math11-13", name: "Trigonometry", classLevel: "11", sequence: 13 },
-
-        { id: "math12-1", name: "Matrices", classLevel: "12", sequence: 14 },
-        { id: "math12-2", name: "Determinants", classLevel: "12", sequence: 15 },
-        { id: "math12-3", name: "Inverse Trigonometric Functions", classLevel: "12", sequence: 16 },
-        { id: "math12-4", name: "Continuity and Differentiability", classLevel: "12", sequence: 17 },
-        { id: "math12-5", name: "Application of Derivatives", classLevel: "12", sequence: 18 },
-        { id: "math12-6", name: "Integrals", classLevel: "12", sequence: 19 },
-        { id: "math12-7", name: "Differential Equations", classLevel: "12", sequence: 20 },
-        { id: "math12-8", name: "Vector Algebra", classLevel: "12", sequence: 21 },
-        { id: "math12-9", name: "Three Dimensional Geometry", classLevel: "12", sequence: 22 },
-        { id: "math12-10", name: "Linear Programming", classLevel: "12", sequence: 23 },
-        { id: "math12-11", name: "Probability", classLevel: "12", sequence: 24 }
-      ]
-    };
-
-    const state = {
-      name: "",
-      classMode: "11",
-      subject: "physics",
-      completed: {},
-      authUser: null,
-      authType: "Guest"
-    };
-
-    const loginScreen = document.getElementById("loginScreen");
-    const appScreen = document.getElementById("appScreen");
-
-    const studentName = document.getElementById("studentName");
-    const studentClassLogin = document.getElementById("studentClassLogin");
-    const continueGuestBtn = document.getElementById("continueGuestBtn");
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const loginStatus = document.getElementById("loginStatus");
-
-    const themeBtnLogin = document.getElementById("themeBtnLogin");
-    const themeBtnApp = document.getElementById("themeBtnApp");
-
-    const displayName = document.getElementById("displayName");
-    const displayAuthType = document.getElementById("displayAuthType");
-    const displayClass = document.getElementById("displayClass");
-    const classSelector = document.getElementById("classSelector");
-    const subjectTabs = document.getElementById("subjectTabs");
-    const chapterList = document.getElementById("chapterList");
-
-    const totalChapters = document.getElementById("totalChapters");
-    const completedChapters = document.getElementById("completedChapters");
-    const remainingChapters = document.getElementById("remainingChapters");
-    const progressPercent = document.getElementById("progressPercent");
-
-    const nextChapterTitle = document.getElementById("nextChapterTitle");
-    const nextChapterMeta = document.getElementById("nextChapterMeta");
-    const sequenceText = document.getElementById("sequenceText");
-    const firebaseStatus = document.getElementById("firebaseStatus");
-
-    const saveBtn = document.getElementById("saveBtn");
-    const loadBtn = document.getElementById("loadBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    function applyTheme(mode) {
-      document.documentElement.setAttribute("data-theme", mode);
+  /* ── STREAK ──────────────────────────────────────────────── */
+  function updateStreak() {
+    const today     = new Date().toDateString();
+    const last      = localStorage.getItem("jee_lastStudy");
+    let   streak    = Number(localStorage.getItem("jee_streak") || 0);
+    if (last === today) {
+      // already marked
+    } else {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      streak = (last === yesterday) ? streak + 1 : streak; // only increment on explicit mark
+      // don't reset here; reset only if 2+ days missed
     }
+    streakCount.textContent = streak + " days";
+  }
 
-    let currentTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    applyTheme(currentTheme);
-
-    function toggleTheme() {
-      currentTheme = currentTheme === "dark" ? "light" : "dark";
-      applyTheme(currentTheme);
+  window.markTodayStudied = function() {
+    const today     = new Date().toDateString();
+    const last      = localStorage.getItem("jee_lastStudy");
+    let   streak    = Number(localStorage.getItem("jee_streak") || 0);
+    if (last !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      streak = (last === yesterday) ? streak + 1 : 1;
+      localStorage.setItem("jee_lastStudy", today);
+      localStorage.setItem("jee_streak", streak);
     }
+    streakCount.textContent = streak + " days";
+  };
 
-    themeBtnLogin.addEventListener("click", toggleTheme);
-    themeBtnApp.addEventListener("click", toggleTheme);
+  /* ── SYLLABUS HELPERS ────────────────────────────────────── */
+  function getVisible(subject) {
+    const all = syllabus[subject];
+    if (state.classMode === "dropper") return [...all].sort((a,b) => a.sequence - b.sequence);
+    return all.filter(ch => ch.classLevel === state.classMode).sort((a,b) => a.sequence - b.sequence);
+  }
 
-    function showScreen(name) {
-      loginScreen.classList.remove("active");
-      appScreen.classList.remove("active");
-      if (name === "login") loginScreen.classList.add("active");
-      if (name === "app") appScreen.classList.add("active");
-    }
+  function isDone(id) { return Boolean(state.completed[id]); }
 
-    function normalizeName(name) {
-      return name.trim().replace(/\s+/g, " ");
-    }
+  function getNext(subject) {
+    return getVisible(subject).find(ch => !isDone(ch.id)) || null;
+  }
 
-    function getVisibleChapters(subject) {
-      const all = syllabus[subject];
-      if (state.classMode === "dropper") return [...all].sort((a, b) => a.sequence - b.sequence);
-      return all
-        .filter(ch => ch.classLevel === state.classMode)
-        .sort((a, b) => a.sequence - b.sequence);
-    }
+  /* ── MOTIVATION ──────────────────────────────────────────── */
+  function updateMotivation(pct) {
+    let txt;
+    if      (pct < 10)  txt = "Every legend starts at zero. Open that first chapter 📖";
+    else if (pct < 25)  txt = "Solid start! Small steps build big habits 💪";
+    else if (pct < 50)  txt = "You're warming up. Stay consistent 🔥";
+    else if (pct < 70)  txt = "Past halfway — you're ahead of most students 🚀";
+    else if (pct < 90)  txt = "Final stretch! Push through 👑";
+    else if (pct < 100) txt = "Almost there. Don't stop now 🏁";
+    else                txt = "YOU completed the entire syllabus. Absolute LEGEND 🏆";
+    motivationText.textContent = txt;
+  }
 
-    function isCompleted(chapterId) {
-      return Boolean(state.completed[chapterId]);
-    }
+  /* ── RENDER FUNCTIONS ────────────────────────────────────── */
+  function renderSubjectTabs() {
+    const subjects = [
+      { key:"physics",     label:"⚛️ Physics"     },
+      { key:"chemistry",   label:"🧪 Chemistry"   },
+      { key:"mathematics", label:"📐 Mathematics" }
+    ];
+    subjectTabs.innerHTML = "";
+    subjects.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "tab" + (state.subject === item.key ? " active" : "");
+      btn.textContent = item.label;
+      btn.addEventListener("click", () => { state.subject = item.key; renderAll(); });
+      subjectTabs.appendChild(btn);
+    });
+  }
 
-    function getNextChapter(subject) {
-      const visible = getVisibleChapters(subject);
-      return visible.find(ch => !isCompleted(ch.id)) || null;
-    }
+  function renderChapters() {
+    const visible = getVisible(state.subject);
+    const next    = getNext(state.subject);
+    chapterListEl.innerHTML = "";
 
-    function renderSubjectTabs() {
-      const subjects = [
-        { key: "physics", label: "Physics" },
-        { key: "chemistry", label: "Chemistry" },
-        { key: "mathematics", label: "Mathematics" }
-      ];
+    visible.forEach(ch => {
+      const done = isDone(ch.id);
+      const isNext = next && next.id === ch.id;
+      const row = document.createElement("div");
+      row.className = "chapter" + (done ? " done" : "");
 
-      subjectTabs.innerHTML = "";
-      subjects.forEach(item => {
-        const btn = document.createElement("button");
-        btn.className = "tab" + (state.subject === item.key ? " active" : "");
-        btn.textContent = item.label;
-        btn.addEventListener("click", () => {
-          state.subject = item.key;
-          renderAll();
-        });
-        subjectTabs.appendChild(btn);
-      });
-    }
-
-    function renderChapters() {
-      const visible = getVisibleChapters(state.subject);
-      const next = getNextChapter(state.subject);
-      chapterList.innerHTML = "";
-
-      visible.forEach(ch => {
-        const row = document.createElement("div");
-        row.className = "chapter";
-
-        const done = isCompleted(ch.id);
-
-        row.innerHTML = `
-          <div class="chapter-left">
-            <input type="checkbox" ${done ? "checked" : ""} aria-label="Mark ${ch.name} complete">
-            <div>
-              <h4>${ch.name}</h4>
-              <p>Class ${ch.classLevel} • Sequence ${ch.sequence}</p>
-            </div>
-          </div>
+      row.innerHTML = `
+        <div class="chapter-left">
+          <input type="checkbox" ${done ? "checked" : ""} aria-label="Mark ${ch.name} complete">
           <div>
-            ${done
-              ? `<span class="badge badge-done">Completed</span>`
-              : next && next.id === ch.id
-                ? `<span class="badge badge-next">Next</span>`
-                : ``}
+            <h4>${ch.name}</h4>
+            <p>Class ${ch.classLevel} · Seq ${ch.sequence}</p>
           </div>
-        `;
+        </div>
+        <div>
+          ${done    ? `<span class="badge badge-done">✓ Done</span>`
+          : isNext  ? `<span class="badge badge-next">▶ Next</span>`
+          : ``}
+        </div>
+      `;
 
-        const checkbox = row.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener("change", e => {
-          state.completed[ch.id] = e.target.checked;
-          renderAll();
-        });
-
-        chapterList.appendChild(row);
+      row.querySelector('input[type="checkbox"]').addEventListener("change", e => {
+        state.completed[ch.id] = e.target.checked;
+        saveLocal();
+        renderAll();
       });
+
+      chapterListEl.appendChild(row);
+    });
+  }
+
+  function renderStats() {
+    const allVisible = Object.keys(syllabus).flatMap(s => getVisible(s));
+    const total   = allVisible.length;
+    const done    = allVisible.filter(ch => isDone(ch.id)).length;
+    const pct     = total ? Math.round((done / total) * 100) : 0;
+
+    completedEl.textContent       = done;
+    remainingEl.textContent       = total - done;
+    progressPercentEl.textContent = pct + "%";
+    progressFill.style.width      = pct + "%";
+    progressLabel.textContent     = `${done} / ${total} chapters`;
+    updateMotivation(pct);
+  }
+
+  function renderNext() {
+    const visible = getVisible(state.subject);
+    const next    = getNext(state.subject);
+    const subLabel = capitalize(state.subject);
+
+    if (!visible.length) {
+      nextChapterTitle.textContent = "No chapters available";
+      nextChapterMeta.textContent  = "Check class & subject selection.";
+      sequenceText.textContent     = "—";
+      return;
     }
 
-    function renderStats() {
-      const allVisible = Object.keys(syllabus).flatMap(subject => getVisibleChapters(subject));
-      const total = allVisible.length;
-      const done = allVisible.filter(ch => isCompleted(ch.id)).length;
-      const remaining = total - done;
-      const percent = total ? Math.round((done / total) * 100) : 0;
+    sequenceText.textContent = visible.map(ch => ch.name).join(" → ");
 
-      totalChapters.textContent = total;
-      completedChapters.textContent = done;
-      remainingChapters.textContent = remaining;
-      progressPercent.textContent = percent + "%";
+    if (!next) {
+      nextChapterTitle.textContent = `🎉 All ${subLabel} chapters done!`;
+      nextChapterMeta.textContent  = `You've finished ${subLabel} for ${state.classMode === "dropper" ? "Dropper" : "Class " + state.classMode}.`;
+    } else {
+      nextChapterTitle.textContent = next.name;
+      nextChapterMeta.textContent  = `${subLabel} · Class ${next.classLevel} · Sequence ${next.sequence}`;
     }
+  }
 
-    function renderNext() {
-      const next = getNextChapter(state.subject);
-      const visible = getVisibleChapters(state.subject);
+  function renderUserInfo() {
+    displayName.textContent     = state.name || "-";
+    displayAuthType.textContent = state.authType;
+    displayClass.textContent    = state.classMode === "dropper" ? "Dropper" : `Class ${state.classMode}`;
+    classSelector.value         = state.classMode;
+  }
 
-      if (!visible.length) {
-        nextChapterTitle.textContent = "No chapters available";
-        nextChapterMeta.textContent = "Please check the selected class and subject.";
-        sequenceText.textContent = "No sequence available.";
-        return;
-      }
+  function renderFirebaseStatus() {
+    if (!firebaseReady) {
+      firebaseStatus.innerHTML = `<span class="status-dot dot-red"></span>Firebase not configured. Guest mode only.`;
+    } else if (state.authUser) {
+      firebaseStatus.innerHTML = `<span class="status-dot dot-green"></span>Connected as ${state.authUser.email || "Google user"}. Progress syncs online.`;
+    } else {
+      firebaseStatus.innerHTML = `<span class="status-dot dot-blue"></span>Firebase ready. Login with Google to sync online.`;
+    }
+  }
 
-      sequenceText.textContent = visible.map(ch => ch.name).join(" → ");
+  function renderAll() {
+    renderUserInfo();
+    renderSubjectTabs();
+    renderChapters();
+    renderStats();
+    renderNext();
+    renderFirebaseStatus();
+    updateStreak();
+  }
 
-      if (!next) {
-        nextChapterTitle.textContent = "All shown chapters completed";
-        nextChapterMeta.textContent = `You finished all visible ${state.subject} chapters for ${state.classMode === "dropper" ? "Dropper" : "Class " + state.classMode}.`;
+  /* ── LOCAL STORAGE ───────────────────────────────────────── */
+  function saveLocal() {
+    localStorage.setItem("jee_completed", JSON.stringify(state.completed));
+    localStorage.setItem("jee_class",     state.classMode);
+    localStorage.setItem("jee_subject",   state.subject);
+    localStorage.setItem("jee_name",      state.name);
+  }
+
+  function loadLocal() {
+    try {
+      state.completed  = JSON.parse(localStorage.getItem("jee_completed") || "{}");
+      state.classMode  = localStorage.getItem("jee_class")   || "11";
+      state.subject    = localStorage.getItem("jee_subject") || "physics";
+      state.name       = localStorage.getItem("jee_name")    || "";
+    } catch(e) {}
+  }
+
+  /* ── FIREBASE SAVE / LOAD ────────────────────────────────── */
+  function getUserPath() {
+    if (state.authUser?.uid) return `users/${state.authUser.uid}/progress`;
+    const key = (state.name||"guest").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_");
+    return `guestUsers/${key}/progress`;
+  }
+
+  async function saveProgress() {
+    if (!firebaseReady) { alert("Firebase not configured."); return; }
+    try {
+      await set(ref(db, getUserPath()), {
+        name: state.name, classMode: state.classMode,
+        subject: state.subject, completed: state.completed,
+        updatedAt: new Date().toISOString()
+      });
+      alert("✅ Progress saved to Firebase!");
+    } catch(e) { console.error(e); alert("Could not save."); }
+  }
+
+  async function loadProgress() {
+    if (!firebaseReady) { alert("Firebase not configured."); return; }
+    try {
+      const snap = await get(ref(db, getUserPath()));
+      if (snap.exists()) {
+        const d = snap.val();
+        state.name      = d.name      || state.name;
+        state.classMode = d.classMode || state.classMode;
+        state.subject   = d.subject   || state.subject;
+        state.completed = d.completed || {};
+        saveLocal();
+        renderAll();
+        alert("📂 Progress loaded!");
       } else {
-        nextChapterTitle.textContent = next.name;
-        nextChapterMeta.textContent = `${capitalize(state.subject)} • Class ${next.classLevel} • Sequence ${next.sequence}`;
+        alert("No saved progress found yet.");
       }
-    }
+    } catch(e) { console.error(e); alert("Could not load."); }
+  }
 
-    function renderUserInfo() {
-      displayName.textContent = state.name || "-";
-      displayAuthType.textContent = state.authType;
-      displayClass.textContent = state.classMode === "dropper" ? "Dropper" : `Class ${state.classMode}`;
-      classSelector.value = state.classMode;
-    }
+  saveBtn.addEventListener("click", saveProgress);
+  loadBtn.addEventListener("click", loadProgress);
 
-    function renderFirebaseStatus() {
-      if (!firebaseReady) {
-        firebaseStatus.textContent = "Firebase config missing. App is running in guest mode only.";
-      } else if (state.authUser) {
-        firebaseStatus.textContent = `Connected as ${state.authUser.email || state.authUser.displayName || "Google user"}. Progress can be saved online.`;
-      } else {
-        firebaseStatus.textContent = "Firebase ready, but not logged in with Google. You can still use guest mode.";
-      }
-    }
+  /* ── CLASS SELECTOR ──────────────────────────────────────── */
+  classSelector.addEventListener("change", () => {
+    state.classMode = classSelector.value;
+    saveLocal();
+    renderAll();
+  });
 
-    function renderAll() {
-      renderUserInfo();
-      renderSubjectTabs();
-      renderChapters();
-      renderStats();
-      renderNext();
-      renderFirebaseStatus();
-    }
+  /* ── LOGOUT ──────────────────────────────────────────────── */
+  logoutBtn.addEventListener("click", async () => {
+    try { if (firebaseReady && auth && state.authUser) await signOut(auth); } catch(e) {}
+    state.authUser = null; state.authType = "Guest";
+    state.subject = "physics";
+    showScreen("login");
+  });
 
-    function startApp() {
+  /* ── LOGIN ───────────────────────────────────────────────── */
+  continueGuestBtn.addEventListener("click", () => {
+    const name = studentName.value.trim().replace(/\s+/g," ");
+    if (!name) { loginStatus.textContent = "Please enter your name first."; return; }
+    state.name      = name;
+    state.classMode = studentClassLogin.value;
+    state.authType  = "Guest";
+    state.authUser  = null;
+    loadLocal();
+    if (localStorage.getItem("jee_name") === name) {
+      // restore saved completed from local
+    } else {
+      state.completed = {};
+    }
+    saveLocal();
+    showScreen("app");
+    renderAll();
+  });
+
+  googleLoginBtn.addEventListener("click", async () => {
+    const name = studentName.value.trim().replace(/\s+/g," ");
+    if (!name) { loginStatus.textContent = "Please enter your name before Google login."; return; }
+    if (!firebaseReady) { loginStatus.textContent = "Firebase not configured."; return; }
+    try {
+      const result = await signInWithPopup(auth, provider);
+      state.authUser  = result.user;
+      state.authType  = "Google";
+      state.name      = name;
+      state.classMode = studentClassLogin.value;
       showScreen("app");
       renderAll();
+      await loadProgress();
+    } catch(e) {
+      console.error(e);
+      loginStatus.textContent = "Google login failed. Check Firebase Auth setup.";
     }
+  });
 
-    continueGuestBtn.addEventListener("click", () => {
-      const name = normalizeName(studentName.value);
-      if (!name) {
-        loginStatus.textContent = "Please enter your name first.";
-        return;
-      }
-      state.name = name;
-      state.classMode = studentClassLogin.value;
-      state.authType = "Guest";
-      state.authUser = null;
-      startApp();
+  /* ── AUTH STATE CHANGE ───────────────────────────────────── */
+  if (firebaseReady && auth) {
+    onAuthStateChanged(auth, user => {
+      state.authUser = user || null;
+      if (!user && state.authType !== "Guest") state.authType = "Guest";
+      renderFirebaseStatus();
     });
+  }
 
-    googleLoginBtn.addEventListener("click", async () => {
-      const name = normalizeName(studentName.value);
-      if (!name) {
-        loginStatus.textContent = "Please enter your name before Google login.";
-        return;
-      }
+  /* ── HELPERS ─────────────────────────────────────────────── */
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-      state.name = name;
-      state.classMode = studentClassLogin.value;
-
-      if (!firebaseReady) {
-        loginStatus.textContent = "Firebase is not configured yet. Add your Firebase keys first.";
-        return;
-      }
-
-      try {
-        const result = await signInWithPopup(auth, provider);
-        state.authUser = result.user;
-        state.authType = "Google";
-        loginStatus.textContent = "Google login successful.";
-        startApp();
-        await loadProgress();
-      } catch (error) {
-        console.error(error);
-        loginStatus.textContent = "Google login failed. Check Firebase Auth setup and authorized domain.";
-      }
-    });
-
-    classSelector.addEventListener("change", () => {
-      state.classMode = classSelector.value;
-      renderAll();
-    });
-
-    function capitalize(text) {
-      return text.charAt(0).toUpperCase() + text.slice(1);
-    }
-
-    function getProgressPayload() {
-      return {
-        name: state.name,
-        classMode: state.classMode,
-        subject: state.subject,
-        completed: state.completed,
-        updatedAt: new Date().toISOString()
-      };
-    }
-
-    function getUserPath() {
-      if (state.authUser?.uid) return `users/${state.authUser.uid}/progress`;
-      const fallbackKey = normalizeName(state.name).toLowerCase().replace(/[^a-z0-9]+/g, "_");
-      return `guestUsers/${fallbackKey}/progress`;
-    }
-
-    async function saveProgress() {
-      if (!firebaseReady) {
-        alert("Firebase is not configured. Add config keys first.");
-        return;
-      }
-      try {
-        await set(ref(db, getUserPath()), getProgressPayload());
-        alert("Progress saved successfully.");
-        renderFirebaseStatus();
-      } catch (error) {
-        console.error(error);
-        alert("Could not save progress.");
-      }
-    }
-
-    async function loadProgress() {
-      if (!firebaseReady) {
-        alert("Firebase is not configured. Add config keys first.");
-        return;
-      }
-      try {
-        const snapshot = await get(ref(db, getUserPath()));
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          state.name = data.name || state.name;
-          state.classMode = data.classMode || state.classMode;
-          state.subject = data.subject || state.subject;
-          state.completed = data.completed || {};
-          renderAll();
-          alert("Progress loaded successfully.");
-        } else {
-          alert("No saved progress found yet.");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Could not load progress.");
-      }
-    }
-
-    saveBtn.addEventListener("click", saveProgress);
-    loadBtn.addEventListener("click", loadProgress);
-
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        if (firebaseReady && auth && state.authUser) {
-          await signOut(auth);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-
-      state.authUser = null;
-      state.authType = "Guest";
-      state.subject = "physics";
-      showScreen("login");
-      renderAll();
-    });
-
-    if (firebaseReady && auth) {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          state.authUser = user;
-          state.authType = "Google";
-        } else {
-          state.authUser = null;
-          if (state.authType !== "Guest") state.authType = "Guest";
-        }
-        renderFirebaseStatus();
-      });
-    }
-
-    renderAll();
+  /* ── BOOT ────────────────────────────────────────────────── */
+  loadLocal();
+  renderAll();
   </script>
 </body>
 </html>
