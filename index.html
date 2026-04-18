@@ -1,1021 +1,1121 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JEE Chapter Tracker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>JEE Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --bg0:     #050810;
+  --bg1:     #090d1a;
+  --bg2:     #0d1224;
+  --surface: #111827;
+  --card:    rgba(17,24,39,0.85);
+  --border:  rgba(0,245,255,0.12);
+  --border2: rgba(0,245,255,0.06);
+  --cyan:    #00f5ff;
+  --cyan2:   #00c8d4;
+  --violet:  #8b5cf6;
+  --violet2: #6d28d9;
+  --green:   #10b981;
+  --green2:  #34d399;
+  --amber:   #f59e0b;
+  --red:     #ef4444;
+  --text:    #e2e8f0;
+  --muted:   #64748b;
+  --muted2:  #94a3b8;
+  --glow-c:  0 0 20px rgba(0,245,255,0.35);
+  --glow-v:  0 0 20px rgba(139,92,246,0.35);
+  --glow-g:  0 0 20px rgba(16,185,129,0.35);
+}
 
-  <style>
-    /* ── TOKENS ── */
-    :root {
-      --bg:        #f0f4ff;
-      --surface:   #ffffff;
-      --surface-2: #e2e8f0;
-      --card-bg:   rgba(255,255,255,0.65);
-      --card-border: rgba(255,255,255,0.3);
-      --text:      #0f172a;
-      --muted:     #64748b;
-      --border:    #cbd5e1;
-      --primary:   #3b82f6;
-      --primary2:  #06b6d4;
-      --success:   #22c55e;
-      --success2:  #4ade80;
-      --warning:   #f59e0b;
-      --danger:    #ef4444;
-      --shadow:    0 8px 32px rgba(15,23,42,0.1);
-      --radius:    20px;
-    }
-    [data-theme="dark"] {
-      --bg:        #0f172a;
-      --surface:   #1e293b;
-      --surface-2: #334155;
-      --card-bg:   rgba(30,41,59,0.65);
-      --card-border: rgba(255,255,255,0.08);
-      --text:      #f1f5f9;
-      --muted:     #94a3b8;
-      --border:    #334155;
-      --primary:   #60a5fa;
-      --primary2:  #22d3ee;
-      --success:   #4ade80;
-      --shadow:    0 8px 32px rgba(0,0,0,0.35);
-    }
+/* ═══════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg0);
+  color:var(--text);
+  overflow-x:hidden;
+}
+button,input,select{font:inherit;}
+button{cursor:pointer;}
 
-    /* ── RESET ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background 0.3s, color 0.3s;
-    }
-    button, input, select { font: inherit; }
+/* ═══════════════════════════════════════════════
+   ANIMATED MESH BACKGROUND
+═══════════════════════════════════════════════ */
+.mesh-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+.mesh-bg::before{
+  content:'';position:absolute;
+  width:700px;height:700px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(0,245,255,0.07) 0%,transparent 70%);
+  top:-200px;left:-200px;
+  animation:drift1 18s ease-in-out infinite alternate;
+}
+.mesh-bg::after{
+  content:'';position:absolute;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,0.08) 0%,transparent 70%);
+  bottom:-150px;right:-150px;
+  animation:drift2 22s ease-in-out infinite alternate;
+}
+.mesh-dot{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,245,255,0.06) 0%,transparent 70%);
+  width:400px;height:400px;
+  top:40%;left:50%;transform:translate(-50%,-50%);
+  animation:drift3 14s ease-in-out infinite alternate;
+}
+@keyframes drift1{0%{transform:translate(0,0);}100%{transform:translate(80px,60px);}}
+@keyframes drift2{0%{transform:translate(0,0);}100%{transform:translate(-60px,-80px);}}
+@keyframes drift3{0%{transform:translate(-50%,-50%) scale(1);}100%{transform:translate(-50%,-50%) scale(1.3);}}
 
-    /* ── LOADER ── */
-    #loader {
-      position: fixed; inset: 0;
-      background: #0f172a;
-      color: #f1f5f9;
-      display: grid; place-items: center;
-      z-index: 9999;
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem;
-      letter-spacing: 0.04em;
-      transition: opacity 0.5s ease;
-    }
-    #loader.hidden { opacity: 0; pointer-events: none; }
+/* Grid lines overlay */
+.grid-overlay{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(0,245,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+}
 
-    /* ── SCREENS ── */
-    .screen { display: none; }
-    .screen.active { display: block; }
+/* ═══════════════════════════════════════════════
+   LOADER
+═══════════════════════════════════════════════ */
+#loader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg0);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:24px;
+  transition:opacity 0.6s ease;
+}
+#loader.out{opacity:0;pointer-events:none;}
+.loader-ring{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--border);
+  border-top-color:var(--cyan);
+  animation:spin 1s linear infinite;
+  box-shadow:var(--glow-c);
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-text{
+  font-family:'Orbitron',monospace;font-size:0.85rem;
+  color:var(--cyan);letter-spacing:0.3em;
+  animation:pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
-    /* ═══════════════════════════════════════
-       LOGIN SCREEN
-    ═══════════════════════════════════════ */
-    .login-wrap {
-      min-height: 100vh;
-      display: grid; place-items: center;
-      padding: 24px 16px;
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-    }
-    .login-card {
-      width: 100%; max-width: 520px;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 28px;
-      padding: 36px 32px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-    }
-    .login-logo {
-      width: 52px; height: 52px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
-      display: grid; place-items: center;
-      font-family: 'Syne', sans-serif;
-      font-size: 1.4rem;
-      color: white;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(59,130,246,0.4);
-    }
-    .login-card h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.9rem;
-      color: #f1f5f9;
-      margin-bottom: 8px;
-    }
-    .login-card > p {
-      color: #94a3b8;
-      line-height: 1.65;
-      font-size: 0.95rem;
-      margin-bottom: 8px;
-    }
-    .field { display: grid; gap: 8px; margin: 16px 0; }
-    .field label { font-weight: 600; font-size: 0.9rem; color: #94a3b8; }
-    .field input, .field select {
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.07);
-      color: #f1f5f9;
-      padding: 13px 15px;
-      border-radius: 14px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .field input:focus, .field select:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-    }
-    .field select option { background: #1e293b; }
-    .login-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-    #loginStatus { margin-top: 14px; color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
-    .footer-note { margin-top: 14px; color: #64748b; font-size: 0.85rem; line-height: 1.6; }
+/* ═══════════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════════ */
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:block;}
 
-    /* ═══════════════════════════════════════
-       APP SCREEN
-    ═══════════════════════════════════════ */
-    .app { max-width: 1280px; margin: 0 auto; padding: 24px 20px 60px; }
+/* ═══════════════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════════════ */
+.login-wrap{
+  min-height:100vh;display:grid;place-items:center;
+  padding:24px 16px;
+}
+.login-card{
+  width:100%;max-width:480px;
+  background:rgba(9,13,26,0.92);
+  border:1px solid var(--border);
+  border-radius:24px;padding:40px 36px;
+  backdrop-filter:blur(24px);
+  box-shadow:0 0 0 1px var(--border2),0 32px 80px rgba(0,0,0,0.6),var(--glow-c);
+  animation:slideUp 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 
-    /* TOPBAR */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap; margin-bottom: 22px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-logo {
-      width: 46px; height: 46px; border-radius: 14px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
-      display: grid; place-items: center;
-      font-family: 'Syne', sans-serif; font-size: 1.2rem;
-      color: white; box-shadow: 0 6px 20px rgba(59,130,246,0.35);
-    }
-    .brand-text h1 { font-family: 'Syne', sans-serif; font-size: 1.3rem; }
-    .brand-text p  { color: var(--muted); font-size: 0.88rem; margin-top: 2px; }
-    .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.login-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:999px;
+  border:1px solid var(--border);background:rgba(0,245,255,0.06);
+  font-size:0.72rem;letter-spacing:0.15em;color:var(--cyan);
+  margin-bottom:20px;text-transform:uppercase;
+}
+.login-badge span{
+  width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  box-shadow:var(--glow-c);animation:pulse 1.5s ease-in-out infinite;
+}
 
-    /* HERO */
-    .hero {
-      border-radius: 24px;
-      padding: 30px 28px;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-      color: white;
-      box-shadow: 0 12px 48px rgba(59,130,246,0.35);
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute; top: -50px; right: -50px;
-      width: 220px; height: 220px;
-      background: rgba(255,255,255,0.07); border-radius: 50%;
-    }
-    .hero::after {
-      content: '';
-      position: absolute; bottom: -30px; left: 30%;
-      width: 150px; height: 150px;
-      background: rgba(255,255,255,0.05); border-radius: 50%;
-    }
-    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(1.4rem,3.5vw,1.9rem); margin-bottom: 6px; }
-    .hero p  { opacity: 0.88; font-size: 0.95rem; }
+.login-card h2{
+  font-family:'Orbitron',monospace;
+  font-size:1.7rem;font-weight:900;
+  background:linear-gradient(135deg,#fff 0%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:10px;
+}
+.login-card>p{color:var(--muted2);line-height:1.7;font-size:0.92rem;margin-bottom:4px;}
 
-    /* USER PILLS */
-    .user-row {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      align-items: center; margin-bottom: 18px;
-    }
-    .pill {
-      padding: 7px 13px; border-radius: 999px;
-      background: var(--surface); border: 1px solid var(--border);
-      font-size: 0.88rem; color: var(--muted);
-    }
-    .pill strong { color: var(--text); }
+.field{display:grid;gap:8px;margin:18px 0;}
+.field label{font-size:0.8rem;font-weight:600;color:var(--muted2);letter-spacing:0.06em;text-transform:uppercase;}
+.field input,.field select{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);
+  padding:14px 16px;border-radius:12px;outline:none;
+  transition:border-color 0.25s,box-shadow 0.25s;
+}
+.field input::placeholder{color:var(--muted);}
+.field select option{background:var(--bg2);}
+.field input:focus,.field select:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px rgba(0,245,255,0.12),var(--glow-c);
+}
+.login-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+#loginStatus{margin-top:14px;font-size:0.85rem;color:var(--amber);min-height:20px;}
+.footer-note{margin-top:16px;color:var(--muted);font-size:0.8rem;line-height:1.7;}
 
-    /* CARDS */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      box-shadow: var(--shadow);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.14); }
+/* ═══════════════════════════════════════════════
+   APP SCREEN
+═══════════════════════════════════════════════ */
+.app{max-width:1320px;margin:0 auto;padding:28px 22px 80px;}
 
-    /* GRID */
-    .row { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); }
-    .col-3  { grid-column: span 3; }
-    .col-6  { grid-column: span 6; }
-    .col-12 { grid-column: span 12; }
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;margin-bottom:28px;
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-logo{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  display:grid;place-items:center;
+  font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:#fff;
+  box-shadow:var(--glow-c);position:relative;overflow:hidden;
+}
+.brand-logo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
+}
+.brand-text h1{
+  font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:700;
+  background:linear-gradient(90deg,#fff,var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:0.05em;
+}
+.brand-text p{color:var(--muted);font-size:0.8rem;margin-top:3px;}
 
-    @media (max-width: 960px) {
-      .col-3  { grid-column: span 6; }
-      .col-6  { grid-column: span 12; }
-    }
-    @media (max-width: 600px) {
-      .col-3  { grid-column: span 12; }
-      .app    { padding: 14px 14px 60px; }
-    }
+.topbar-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 
-    /* STAT CARDS */
-    .stat { text-align: center; }
-    .stat h3 {
-      font-size: 0.78rem; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.07em;
-      color: var(--muted); margin-bottom: 6px;
-    }
-    .stat strong { font-family: 'Syne', sans-serif; font-size: 1.75rem; }
+/* ── HERO ── */
+.hero{
+  border-radius:24px;padding:36px 32px;margin-bottom:24px;
+  background:linear-gradient(135deg,rgba(0,245,255,0.1) 0%,rgba(139,92,246,0.1) 100%);
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,245,255,0.04),rgba(139,92,246,0.06));
+  border-radius:24px;
+}
+.hero-inner{position:relative;z-index:1;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:0.72rem;letter-spacing:0.2em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:12px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--cyan);}
+.hero h1{
+  font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3.5vw,2.1rem);
+  font-weight:900;
+  background:linear-gradient(135deg,#fff 30%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.2;margin-bottom:8px;
+}
+.hero p{color:var(--muted2);font-size:0.95rem;max-width:480px;}
+.hero-glow{
+  position:absolute;right:-60px;top:-60px;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,245,255,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
 
-    /* PROGRESS BAR */
-    .progress-label {
-      display: flex; justify-content: space-between;
-      font-size: 0.82rem; color: var(--muted); margin-bottom: 10px;
-    }
-    .progress-bar {
-      width: 100%; height: 12px;
-      background: var(--surface-2); border-radius: 999px; overflow: hidden;
-    }
-    #progressFill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--success), var(--success2));
-      width: 0%;
-      transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
-    }
+/* ── USER PILLS ── */
+.user-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.pill{
+  padding:7px 14px;border-radius:999px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  font-size:0.82rem;color:var(--muted2);
+  display:flex;align-items:center;gap:6px;
+}
+.pill strong{color:var(--text);}
+.pill-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-cyan{background:var(--cyan);box-shadow:var(--glow-c);}
+.dot-violet{background:var(--violet);box-shadow:var(--glow-v);}
+.dot-green{background:var(--green);box-shadow:var(--glow-g);}
 
-    /* MOTIVATION BOX */
-    .motivation-box {
-      border-radius: 16px; padding: 16px 20px;
-      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.07));
-      border: 1px solid rgba(34,197,94,0.2);
-      margin-top: 12px;
-    }
-    .motivation-box h4 {
-      font-size: 0.72rem; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--success); margin-bottom: 5px;
-    }
-    .motivation-box p { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+/* ── GRID ── */
+.row{display:grid;gap:16px;grid-template-columns:repeat(12,1fr);}
+.col-3{grid-column:span 3;}
+.col-4{grid-column:span 4;}
+.col-6{grid-column:span 6;}
+.col-8{grid-column:span 8;}
+.col-12{grid-column:span 12;}
+@media(max-width:1024px){.col-3{grid-column:span 6;}.col-4{grid-column:span 6;}.col-6{grid-column:span 12;}.col-8{grid-column:span 12;}}
+@media(max-width:640px){.col-3,.col-4,.col-6,.col-8{grid-column:span 12;}.app{padding:16px 14px 60px;}}
 
-    /* SECTION TITLES */
-    .section-head {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
-    }
-    .section-head h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; }
-    .section-head .hint { color: var(--muted); font-size: 0.82rem; }
+/* ── CARDS ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;padding:22px 24px;
+  backdrop-filter:blur(20px);
+  transition:border-color 0.3s,box-shadow 0.3s,transform 0.25s;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,245,255,0.3),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.card:hover{border-color:rgba(0,245,255,0.25);box-shadow:var(--glow-c);transform:translateY(-3px);}
+.card:hover::before{opacity:1;}
 
-    /* SUBJECT TABS */
-    .subject-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-    .tab {
-      padding: 9px 16px; border-radius: 999px;
-      border: 1px solid var(--border); background: var(--surface);
-      cursor: pointer; font-weight: 600; font-size: 0.88rem;
-      color: var(--text); transition: all 0.2s ease;
-    }
-    .tab:hover { border-color: var(--primary); color: var(--primary); }
-    .tab.active { background: var(--primary); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+/* ── STAT CARDS ── */
+.stat{text-align:center;cursor:default;}
+.stat-icon{font-size:1.4rem;margin-bottom:8px;display:block;}
+.stat h3{
+  font-size:0.7rem;font-weight:600;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+}
+.stat-val{
+  font-family:'Orbitron',monospace;font-size:1.9rem;font-weight:700;
+  background:linear-gradient(135deg,#fff,var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;
+}
+.stat.streak .stat-val{background:linear-gradient(135deg,#fff,var(--amber));-webkit-background-clip:text;background-clip:text;}
+.stat.done .stat-val{background:linear-gradient(135deg,#fff,var(--green));-webkit-background-clip:text;background-clip:text;}
 
-    /* CLASS SELECT */
-    .class-select-wrap { display: flex; align-items: center; gap: 10px; }
-    .class-select-wrap label { font-size: 0.88rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+/* ── PROGRESS ── */
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.progress-header span{font-size:0.82rem;color:var(--muted2);}
+.progress-header strong{
+  font-family:'Orbitron',monospace;font-size:1.1rem;
+  color:var(--cyan);text-shadow:var(--glow-c);
+}
+.progress-track{
+  height:8px;border-radius:999px;
+  background:rgba(255,255,255,0.06);
+  position:relative;overflow:visible;
+}
+.progress-fill{
+  height:100%;border-radius:999px;width:0%;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  box-shadow:0 0 12px rgba(0,245,255,0.5);
+  transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;
+}
+.progress-fill::after{
+  content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+  border:2px solid var(--bg0);
+}
+.motive-strip{
+  margin-top:14px;padding:12px 16px;
+  border-radius:12px;
+  background:rgba(16,185,129,0.07);
+  border:1px solid rgba(16,185,129,0.2);
+  display:flex;align-items:center;gap:10px;
+}
+.motive-strip::before{content:'💬';font-size:1rem;flex-shrink:0;}
+#motivationText{font-size:0.9rem;font-weight:500;color:var(--green2);}
 
-    select.styled {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      padding: 9px 14px;
-      border-radius: 12px; outline: none;
-      cursor: pointer; font-size: 0.88rem;
-      transition: border-color 0.2s;
-    }
-    select.styled:focus { border-color: var(--primary); }
+/* ── CLASS + SUBJECT PANEL ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.section-head h3{font-family:'Orbitron',monospace;font-size:0.85rem;letter-spacing:0.08em;color:var(--cyan);}
+.section-hint{font-size:0.78rem;color:var(--muted);}
 
-    /* CHAPTER LIST */
-    .chapter-list { display: grid; gap: 10px; max-height: 520px; overflow-y: auto; padding-right: 4px; }
-    .chapter-list::-webkit-scrollbar { width: 5px; }
-    .chapter-list::-webkit-scrollbar-track { background: transparent; }
-    .chapter-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+.subject-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.tab{
+  padding:10px 20px;border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.03);
+  color:var(--muted2);font-weight:600;font-size:0.85rem;
+  transition:all 0.25s ease;letter-spacing:0.03em;
+}
+.tab:hover{border-color:var(--cyan);color:var(--cyan);}
+.tab.active{
+  background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(139,92,246,0.15));
+  border-color:var(--cyan);color:var(--cyan);
+  box-shadow:var(--glow-c),inset 0 0 20px rgba(0,245,255,0.05);
+}
 
-    .chapter {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 12px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 13px 15px;
-      transition: border-color 0.2s, transform 0.2s, background 0.2s;
-    }
-    .chapter:hover { border-color: var(--primary); transform: translateX(3px); }
-    .chapter.done { opacity: 0.6; }
-    .chapter.done h4 { text-decoration: line-through; }
+select.styled{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);
+  padding:10px 16px;border-radius:12px;outline:none;
+  font-size:0.85rem;transition:border-color 0.25s;
+}
+select.styled:focus{border-color:var(--cyan);box-shadow:var(--glow-c);}
+select.styled option{background:var(--bg2);}
 
-    .chapter-left { display: flex; gap: 12px; align-items: flex-start; flex: 1; }
-    .chapter input[type="checkbox"] { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--primary); flex-shrink: 0; cursor: pointer; }
-    .chapter h4 { font-size: 0.95rem; margin-bottom: 4px; }
-    .chapter p  { font-size: 0.82rem; color: var(--muted); }
+/* ── CHAPTER LIST ── */
+.chapter-list{
+  display:grid;gap:8px;
+  max-height:500px;overflow-y:auto;
+  padding-right:6px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.chapter-list::-webkit-scrollbar{width:4px;}
+.chapter-list::-webkit-scrollbar-track{background:transparent;}
+.chapter-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px;}
 
-    /* BADGES */
-    .badge {
-      display: inline-flex; align-items: center;
-      border-radius: 999px; padding: 5px 11px;
-      font-size: 0.75rem; font-weight: 700;
-      white-space: nowrap;
-    }
-    .badge-next { background: rgba(59,130,246,0.12); color: var(--primary); }
-    .badge-done { background: rgba(34,197,94,0.12); color: var(--success); }
-    .badge-high   { background: rgba(239,68,68,0.12);  color: var(--danger); }
-    .badge-medium { background: rgba(245,158,11,0.12); color: var(--warning); }
-    .badge-low    { background: rgba(34,197,94,0.12);  color: var(--success); }
+.chapter{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border2);
+  border-radius:14px;padding:13px 16px;
+  transition:all 0.2s ease;cursor:default;
+}
+.chapter:hover{background:rgba(0,245,255,0.04);border-color:rgba(0,245,255,0.2);}
+.chapter.done{opacity:0.45;}
+.chapter.done .ch-name{text-decoration:line-through;}
+.chapter-left{display:flex;gap:12px;align-items:center;flex:1;}
+.chapter input[type="checkbox"]{
+  width:18px;height:18px;flex-shrink:0;
+  accent-color:var(--cyan);cursor:pointer;
+}
+.ch-name{font-size:0.9rem;font-weight:500;}
+.ch-meta{font-size:0.75rem;color:var(--muted);margin-top:2px;}
 
-    /* NEXT / SEQUENCE BOXES */
-    .next-grid { display: grid; gap: 12px; }
-    .next-box {
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, var(--surface), var(--surface-2));
-      border-radius: 16px; padding: 16px 18px;
-    }
-    .next-box h4 { font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 6px; }
-    .next-box p  { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
-    .next-box .status-dot {
-      display: inline-block; width: 8px; height: 8px;
-      border-radius: 50%; margin-right: 6px;
-    }
-    .dot-green { background: var(--success); box-shadow: 0 0 6px var(--success); }
-    .dot-blue  { background: var(--primary); box-shadow: 0 0 6px var(--primary); }
-    .dot-red   { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 12px;border-radius:999px;
+  font-size:0.72rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;
+}
+.badge-next{background:rgba(0,245,255,0.1);color:var(--cyan);border:1px solid rgba(0,245,255,0.3);}
+.badge-done{background:rgba(16,185,129,0.1);color:var(--green2);border:1px solid rgba(16,185,129,0.3);}
 
-    /* BUTTONS */
-    .btn {
-      border: 1px solid var(--border);
-      background: var(--surface); color: var(--text);
-      padding: 10px 16px; border-radius: 12px;
-      cursor: pointer; font-weight: 600; font-size: 0.88rem;
-      transition: all 0.2s ease; white-space: nowrap;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
-      color: white; border-color: transparent;
-      box-shadow: 0 4px 16px rgba(59,130,246,0.3);
-    }
-    .btn-primary:hover { box-shadow: 0 6px 24px rgba(59,130,246,0.45); }
-    .btn-ghost { background: transparent; }
-    .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border-color: rgba(239,68,68,0.2); }
+/* ── NEXT / SEQUENCE PANEL ── */
+.next-grid{display:grid;gap:12px;align-content:start;}
+.info-box{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);
+  border-radius:16px;padding:16px 18px;
+  transition:border-color 0.25s;
+}
+.info-box:hover{border-color:rgba(0,245,255,0.2);}
+.info-box-label{
+  font-size:0.68rem;letter-spacing:0.15em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.info-box-label::after{content:'';flex:1;height:1px;background:var(--border2);}
+.info-box h4{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:4px;}
+.info-box p{font-size:0.82rem;color:var(--muted2);line-height:1.6;}
 
-    /* STREAK FLAME ANIMATION */
-    @keyframes flicker {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.8; transform: scale(1.08); }
-    }
-    .streak-icon { display: inline-block; animation: flicker 1.6s ease-in-out infinite; }
-  </style>
+.fb-status{font-size:0.82rem;color:var(--muted2);display:flex;align-items:center;gap:8px;}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;animation:pulse 2s ease-in-out infinite;}
+.s-green{background:var(--green);box-shadow:var(--glow-g);}
+.s-cyan{background:var(--cyan);box-shadow:var(--glow-c);}
+.s-red{background:var(--red);box-shadow:0 0 10px rgba(239,68,68,0.5);}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:11px 18px;border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);font-weight:600;font-size:0.85rem;
+  transition:all 0.2s ease;white-space:nowrap;letter-spacing:0.02em;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:var(--glow-c);}
+.btn:active{transform:scale(0.97);}
+
+.btn-primary{
+  background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(139,92,246,0.15));
+  border-color:rgba(0,245,255,0.4);color:var(--cyan);
+  box-shadow:0 4px 20px rgba(0,245,255,0.15);
+}
+.btn-primary:hover{
+  background:linear-gradient(135deg,rgba(0,245,255,0.25),rgba(139,92,246,0.25));
+  box-shadow:var(--glow-c);
+}
+.btn-danger{
+  border-color:rgba(239,68,68,0.3);color:var(--red);
+  background:rgba(239,68,68,0.06);
+}
+.btn-danger:hover{border-color:var(--red);box-shadow:0 0 16px rgba(239,68,68,0.3);}
+.btn-full{width:100%;justify-content:center;display:flex;align-items:center;gap:8px;}
+
+/* ── LOGIN TABS ── */
+.auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.03);}
+.auth-tab{flex:1;padding:11px 8px;border:none;background:transparent;color:var(--muted2);font-weight:600;font-size:0.82rem;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(139,92,246,0.15));color:var(--cyan);box-shadow:inset 0 0 20px rgba(0,245,255,0.06);}
+.auth-tab:hover:not(.active){color:var(--text);}
+.auth-panel{display:none;}.auth-panel.active{display:block;}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:0.78rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.pw-wrap{position:relative;}
+.pw-wrap input{width:100%;padding-right:44px;}
+.pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:4px;}
+.pw-eye:hover{color:var(--cyan);}
+
+/* streak flicker */
+@keyframes flicker{0%,100%{opacity:1;}45%{opacity:0.75;}50%{opacity:1;}55%{opacity:0.8;}}
+.flicker{animation:flicker 2.5s ease-in-out infinite;}
+
+/* entrance animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn 0.5s ease both;}
+.d1{animation-delay:0.05s;}.d2{animation-delay:0.1s;}.d3{animation-delay:0.15s;}.d4{animation-delay:0.2s;}
+.d5{animation-delay:0.25s;}.d6{animation-delay:0.3s;}.d7{animation-delay:0.35s;}
+</style>
 </head>
 <body>
 
-  <!-- ───────── LOADER ───────── -->
-  <div id="loader">🚀 Loading your dashboard...</div>
+<!-- BG -->
+<div class="mesh-bg"><div class="mesh-dot"></div></div>
+<div class="grid-overlay"></div>
 
-  <!-- ═══════════════════════════════════
-       LOGIN SCREEN
-  ═══════════════════════════════════ -->
-  <section id="loginScreen" class="screen active login-wrap">
-    <div class="login-card">
-      <div class="login-logo">J</div>
-      <h2>JEE Chapter Tracker</h2>
-      <p>Track Class 11, Class 12, or Dropper syllabus with streaks, smart sequencing and online save via Firebase.</p>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-text">INITIALIZING...</div>
+</div>
 
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<section id="loginScreen" class="screen active login-wrap">
+  <div class="login-card">
+    <div class="login-badge"><span></span> JEE Command Center v2.0</div>
+    <h2>Study Smarter.<br>Rank Higher.</h2>
+    <p>Cloud sync · Smart sequencing · Streaks. Built for serious JEE aspirants.</p>
+
+    <!-- AUTH TABS -->
+    <div class="auth-tabs" style="margin-top:20px;">
+      <button class="auth-tab active" onclick="switchTab('signin')">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+      <button class="auth-tab" onclick="switchTab('guest')">Guest</button>
+    </div>
+
+    <!-- SHARED: Name + Class (shown on signup & guest) -->
+    <div id="nameRow" class="auth-panel" style="display:none;">
       <div class="field">
         <label for="studentName">Your Name</label>
-        <input id="studentName" type="text" placeholder="Enter your full name" />
+        <input id="studentName" type="text" placeholder="Enter your full name"/>
       </div>
+    </div>
 
+    <!-- Class selector always shown -->
+    <div class="field">
+      <label for="studentClassLogin">Class</label>
+      <select id="studentClassLogin">
+        <option value="11">Class 11</option>
+        <option value="12">Class 12</option>
+        <option value="dropper">Dropper — Full Syllabus</option>
+      </select>
+    </div>
+
+    <!-- SIGN IN PANEL -->
+    <div id="panel-signin" class="auth-panel active">
       <div class="field">
-        <label for="studentClassLogin">Select Class</label>
-        <select id="studentClassLogin">
+        <label>Email</label>
+        <input id="siEmail" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input id="siPassword" type="password" placeholder="Enter password"/>
+          <button class="pw-eye" onclick="togglePw('siPassword',this)">👁</button>
+        </div>
+      </div>
+      <div class="login-actions" style="margin-top:18px;">
+        <button class="btn btn-primary" style="flex:1;" id="emailSignInBtn">⚡ Sign In</button>
+      </div>
+      <div class="divider">or</div>
+      <button class="btn btn-full" id="googleSignInBtn" style="width:100%;">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="flex-shrink:0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- SIGN UP PANEL -->
+    <div id="panel-signup" class="auth-panel">
+      <div class="field">
+        <label>Full Name</label>
+        <input id="suName" type="text" placeholder="Enter your full name"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="suEmail" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input id="suPassword" type="password" placeholder="Min 6 characters"/>
+          <button class="pw-eye" onclick="togglePw('suPassword',this)">👁</button>
+        </div>
+      </div>
+      <div class="login-actions" style="margin-top:18px;">
+        <button class="btn btn-primary" style="flex:1;" id="emailSignUpBtn">🚀 Create Account</button>
+      </div>
+    </div>
+
+    <!-- GUEST PANEL -->
+    <div id="panel-guest" class="auth-panel">
+      <div class="field">
+        <label>Your Name</label>
+        <input id="guestName" type="text" placeholder="Enter your name"/>
+      </div>
+      <div class="login-actions" style="margin-top:18px;">
+        <button class="btn btn-primary" style="flex:1;" id="continueGuestBtn">⚡ Continue as Guest</button>
+      </div>
+      <p class="footer-note" style="margin-top:12px;">Progress saved in your browser only. No account needed.</p>
+    </div>
+
+    <div id="loginStatus"></div>
+    <p class="footer-note" style="margin-top:12px;">
+      ⚠️ Google login requires your domain to be added in Firebase Console → Authentication → Authorized Domains.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<section id="appScreen" class="screen">
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar fade-in">
+    <div class="brand">
+      <div class="brand-logo">J</div>
+      <div class="brand-text">
+        <h1>JEE COMMAND CENTER</h1>
+        <p>Smart chapter sequencing · Cloud sync · Streaks</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="saveBtn">💾 Save</button>
+      <button class="btn" id="loadBtn">📂 Load</button>
+      <button class="btn btn-danger" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero fade-in d1">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Your Mission</div>
+      <h1>Crack JEE with<br>Unbreakable Consistency</h1>
+      <p>Every chapter you check off is a step closer to your rank. Stay locked in.</p>
+    </div>
+  </div>
+
+  <!-- USER PILLS -->
+  <div class="user-row fade-in d2">
+    <div class="pill"><span class="pill-dot dot-cyan"></span>👤 <strong id="displayName">—</strong></div>
+    <div class="pill"><span class="pill-dot dot-violet"></span>🔑 <strong id="displayAuthType">Guest</strong></div>
+    <div class="pill"><span class="pill-dot dot-green"></span>📚 <strong id="displayClass">Class 11</strong></div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="row" style="margin-bottom:16px;">
+    <div class="card stat streak col-3 fade-in d2">
+      <span class="stat-icon flicker">🔥</span>
+      <h3>Study Streak</h3>
+      <span class="stat-val" id="streakCount">0</span>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">days</div>
+    </div>
+    <div class="card stat done col-3 fade-in d3">
+      <span class="stat-icon">✅</span>
+      <h3>Completed</h3>
+      <span class="stat-val" id="completedChapters">0</span>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">chapters</div>
+    </div>
+    <div class="card stat col-3 fade-in d4">
+      <span class="stat-icon">📖</span>
+      <h3>Remaining</h3>
+      <span class="stat-val" id="remainingChapters">0</span>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">chapters</div>
+    </div>
+    <div class="card stat col-3 fade-in d4">
+      <span class="stat-icon">🎯</span>
+      <h3>Progress</h3>
+      <span class="stat-val" id="progressPercent">0%</span>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">overall</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS + MOTIVATION -->
+  <div class="card col-12 fade-in d5" style="margin-bottom:16px;">
+    <div class="progress-header">
+      <span>Overall Syllabus Progress</span>
+      <strong id="progressLabel">0 / 0 chapters</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="motive-strip">
+      <p id="motivationText">Loading your motivation...</p>
+    </div>
+  </div>
+
+  <!-- CLASS + SUBJECT SELECTOR -->
+  <div class="card col-12 fade-in d5" style="margin-bottom:16px;">
+    <div class="section-head">
+      <div>
+        <h3>Subject &amp; Class</h3>
+        <div class="section-hint">11th / 12th shows that class only · Dropper shows all chapters</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:0.8rem;color:var(--muted);">Class:</span>
+        <select id="classSelector" class="styled">
           <option value="11">Class 11</option>
           <option value="12">Class 12</option>
-          <option value="dropper">Dropper (All chapters)</option>
+          <option value="dropper">Dropper</option>
         </select>
       </div>
-
-      <div class="login-actions">
-        <button class="btn btn-primary" id="continueGuestBtn">Continue as Guest</button>
-        <button class="btn" id="googleLoginBtn">🔐 Google Login</button>
-        <button class="btn btn-ghost" id="themeBtnLogin">🌙 Theme</button>
-      </div>
-
-      <p class="footer-note">
-        Google login saves progress to Firebase Realtime Database. Guest mode saves to your browser only.
-      </p>
-      <div id="loginStatus"></div>
     </div>
-  </section>
+    <div class="subject-tabs" id="subjectTabs"></div>
+  </div>
 
-  <!-- ═══════════════════════════════════
-       APP SCREEN
-  ═══════════════════════════════════ -->
-  <section id="appScreen" class="screen">
-    <div class="app">
+  <!-- CHAPTERS + NEXT -->
+  <div class="row fade-in d6">
+    <!-- Chapter list -->
+    <div class="card col-6">
+      <div class="section-head">
+        <h3>📋 Chapters</h3>
+        <span class="section-hint">Check to mark complete</span>
+      </div>
+      <div class="chapter-list" id="chapterList"></div>
+    </div>
 
-      <!-- TOPBAR -->
-      <div class="topbar">
-        <div class="brand">
-          <div class="brand-logo">J</div>
-          <div class="brand-text">
-            <h1>JEE Progress Dashboard</h1>
-            <p>Track chapters, streaks, and next study sequence.</p>
-          </div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-ghost" id="themeBtnApp">🌙 Theme</button>
-          <button class="btn" id="saveBtn">💾 Save</button>
-          <button class="btn" id="loadBtn">📂 Load</button>
-          <button class="btn btn-danger" id="logoutBtn">Logout</button>
+    <!-- Next + Sequence + Status -->
+    <div class="card col-6 next-grid">
+      <div class="section-head">
+        <h3>🎯 What's Next</h3>
+        <span class="section-hint">Smart recommendation</span>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-label">Recommended Chapter</div>
+        <h4 id="nextChapterTitle">No chapter selected yet</h4>
+        <p id="nextChapterMeta">Start marking chapters to get your next recommendation.</p>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-label">Study Sequence</div>
+        <p id="sequenceText" style="font-size:0.8rem;color:var(--muted2);line-height:1.7;">Sequence will appear here.</p>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-label">Cloud Status</div>
+        <div class="fb-status" id="firebaseStatus">
+          <span class="status-dot s-cyan"></span>Checking Firebase...
         </div>
       </div>
 
-      <!-- HERO -->
-      <div class="hero">
-        <h1>🚀 Crack JEE with Consistency</h1>
-        <p>Your personal study tracker with smart chapter sequencing and streak rewards.</p>
-      </div>
+      <button class="btn btn-primary btn-full" onclick="markTodayStudied()">
+        ⚡ Mark Today as Studied
+      </button>
+    </div>
+  </div>
 
-      <!-- USER PILLS -->
-      <div class="user-row">
-        <span class="pill">👤 <strong id="displayName">-</strong></span>
-        <span class="pill">🔑 <strong id="displayAuthType">Guest</strong></span>
-        <span class="pill">📚 <strong id="displayClass">Class 11</strong></span>
-      </div>
+</div><!-- /.app -->
+</section>
 
-      <!-- STATS -->
-      <div class="row" style="margin-bottom:16px;">
-        <div class="card stat col-3">
-          <h3><span class="streak-icon">🔥</span> Streak</h3>
-          <strong id="streakCount">0 days</strong>
-        </div>
-        <div class="card stat col-3">
-          <h3>✅ Completed</h3>
-          <strong id="completedChapters">0</strong>
-        </div>
-        <div class="card stat col-3">
-          <h3>📖 Remaining</h3>
-          <strong id="remainingChapters">0</strong>
-        </div>
-        <div class="card stat col-3">
-          <h3>🎯 Progress</h3>
-          <strong id="progressPercent">0%</strong>
-        </div>
-      </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider,
+  signInWithPopup, signInWithRedirect, getRedirectResult,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getDatabase, ref, set, get }
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-      <!-- PROGRESS BAR + MOTIVATION -->
-      <div class="card col-12" style="margin-bottom:16px;">
-        <div class="progress-label">
-          <span>Overall Progress</span>
-          <span id="progressLabel">0 / 0 chapters</span>
-        </div>
-        <div class="progress-bar">
-          <div id="progressFill"></div>
-        </div>
-        <div class="motivation-box">
-          <h4>💬 Motivation</h4>
-          <p id="motivationText">Loading your motivation...</p>
-        </div>
-      </div>
+/* ── FIREBASE ── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyCUS8TUAsB8clbUcupT9WWM7kiEVZ1PyYg",
+  authDomain:        "bhaiyajee.firebaseapp.com",
+  databaseURL:       "https://bhaiyajee-default-rtdb.firebaseio.com",
+  projectId:         "bhaiyajee",
+  storageBucket:     "bhaiyajee.firebasestorage.app",
+  messagingSenderId: "710710348899",
+  appId:             "1:710710348899:web:30a96012a9c457afc4fc56"
+};
 
-      <!-- CLASS SELECTOR + SUBJECT TABS -->
-      <div class="card col-12" style="margin-bottom:16px;">
-        <div class="section-head">
-          <div>
-            <h3>Select Class &amp; Subject</h3>
-            <span class="hint">11th / 12th shows that class only. Dropper shows everything.</span>
-          </div>
-          <div class="class-select-wrap">
-            <label for="classSelector">Class:</label>
-            <select id="classSelector" class="styled">
-              <option value="11">Class 11</option>
-              <option value="12">Class 12</option>
-              <option value="dropper">Dropper</option>
-            </select>
-          </div>
-        </div>
-        <div class="subject-tabs" id="subjectTabs"></div>
-      </div>
+let firebaseReady=false,app,auth,db,provider;
+try{app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);provider=new GoogleAuthProvider();firebaseReady=true;}
+catch(e){console.error("Firebase:",e);}
 
-      <!-- CHAPTERS + NEXT -->
-      <div class="row">
-        <div class="card col-6">
-          <div class="section-head">
-            <h3>📋 Chapters</h3>
-            <span class="hint">Check to mark completed.</span>
-          </div>
-          <div id="chapterList" class="chapter-list"></div>
-        </div>
+/* ── SYLLABUS ── */
+const syllabus = {
+  physics:[
+    {id:"phy11-1",name:"Units and Measurements",classLevel:"11",sequence:1},
+    {id:"phy11-2",name:"Kinematics",classLevel:"11",sequence:2},
+    {id:"phy11-3",name:"Laws of Motion",classLevel:"11",sequence:3},
+    {id:"phy11-4",name:"Work, Energy and Power",classLevel:"11",sequence:4},
+    {id:"phy11-5",name:"System of Particles & Rotational Motion",classLevel:"11",sequence:5},
+    {id:"phy11-6",name:"Gravitation",classLevel:"11",sequence:6},
+    {id:"phy11-7",name:"Properties of Solids and Liquids",classLevel:"11",sequence:7},
+    {id:"phy11-8",name:"Thermodynamics",classLevel:"11",sequence:8},
+    {id:"phy11-9",name:"Kinetic Theory of Gases",classLevel:"11",sequence:9},
+    {id:"phy11-10",name:"Oscillations and Waves",classLevel:"11",sequence:10},
+    {id:"phy12-1",name:"Electrostatics",classLevel:"12",sequence:11},
+    {id:"phy12-2",name:"Current Electricity",classLevel:"12",sequence:12},
+    {id:"phy12-3",name:"Magnetic Effects of Current & Magnetism",classLevel:"12",sequence:13},
+    {id:"phy12-4",name:"Electromagnetic Induction & AC",classLevel:"12",sequence:14},
+    {id:"phy12-5",name:"Electromagnetic Waves",classLevel:"12",sequence:15},
+    {id:"phy12-6",name:"Optics",classLevel:"12",sequence:16},
+    {id:"phy12-7",name:"Dual Nature of Matter & Radiation",classLevel:"12",sequence:17},
+    {id:"phy12-8",name:"Atoms and Nuclei",classLevel:"12",sequence:18},
+    {id:"phy12-9",name:"Electronic Devices",classLevel:"12",sequence:19},
+    {id:"phy12-10",name:"Experimental Skills",classLevel:"12",sequence:20}
+  ],
+  chemistry:[
+    {id:"chem11-1",name:"Some Basic Concepts of Chemistry",classLevel:"11",sequence:1},
+    {id:"chem11-2",name:"Atomic Structure",classLevel:"11",sequence:2},
+    {id:"chem11-3",name:"Chemical Bonding & Molecular Structure",classLevel:"11",sequence:3},
+    {id:"chem11-4",name:"States of Matter",classLevel:"11",sequence:4},
+    {id:"chem11-5",name:"Thermodynamics",classLevel:"11",sequence:5},
+    {id:"chem11-6",name:"Equilibrium",classLevel:"11",sequence:6},
+    {id:"chem11-7",name:"Redox Reactions",classLevel:"11",sequence:7},
+    {id:"chem11-8",name:"Hydrogen",classLevel:"11",sequence:8},
+    {id:"chem11-9",name:"The s-Block Element",classLevel:"11",sequence:9},
+    {id:"chem11-10",name:"Some p-Block Elements",classLevel:"11",sequence:10},
+    {id:"chem11-11",name:"Organic Chemistry — Principles & Techniques",classLevel:"11",sequence:11},
+    {id:"chem11-12",name:"Hydrocarbons",classLevel:"11",sequence:12},
+    {id:"chem11-13",name:"Environmental Chemistry",classLevel:"11",sequence:13},
+    {id:"chem12-1",name:"Solid State",classLevel:"12",sequence:14},
+    {id:"chem12-2",name:"Solutions",classLevel:"12",sequence:15},
+    {id:"chem12-3",name:"Electrochemistry",classLevel:"12",sequence:16},
+    {id:"chem12-4",name:"Chemical Kinetics",classLevel:"12",sequence:17},
+    {id:"chem12-5",name:"Surface Chemistry",classLevel:"12",sequence:18},
+    {id:"chem12-6",name:"Isolation of Elements",classLevel:"12",sequence:19},
+    {id:"chem12-7",name:"p-Block Elements",classLevel:"12",sequence:20},
+    {id:"chem12-8",name:"d and f Block Elements",classLevel:"12",sequence:21},
+    {id:"chem12-9",name:"Coordination Compounds",classLevel:"12",sequence:22},
+    {id:"chem12-10",name:"Haloalkanes and Haloarenes",classLevel:"12",sequence:23},
+    {id:"chem12-11",name:"Alcohols, Phenols and Ethers",classLevel:"12",sequence:24},
+    {id:"chem12-12",name:"Aldehydes, Ketones and Carboxylic Acids",classLevel:"12",sequence:25},
+    {id:"chem12-13",name:"Organic Compounds Containing Nitrogen",classLevel:"12",sequence:26},
+    {id:"chem12-14",name:"Biomolecules",classLevel:"12",sequence:27},
+    {id:"chem12-15",name:"Polymers",classLevel:"12",sequence:28},
+    {id:"chem12-16",name:"Chemistry in Everyday Life",classLevel:"12",sequence:29}
+  ],
+  mathematics:[
+    {id:"math11-1",name:"Sets, Relations and Functions",classLevel:"11",sequence:1},
+    {id:"math11-2",name:"Complex Numbers & Quadratic Equations",classLevel:"11",sequence:2},
+    {id:"math11-3",name:"Matrices & Determinants (Foundation)",classLevel:"11",sequence:3},
+    {id:"math11-4",name:"Permutations and Combinations",classLevel:"11",sequence:4},
+    {id:"math11-5",name:"Binomial Theorem",classLevel:"11",sequence:5},
+    {id:"math11-6",name:"Sequences and Series",classLevel:"11",sequence:6},
+    {id:"math11-7",name:"Straight Lines",classLevel:"11",sequence:7},
+    {id:"math11-8",name:"Conic Sections",classLevel:"11",sequence:8},
+    {id:"math11-9",name:"Introduction to 3D Geometry",classLevel:"11",sequence:9},
+    {id:"math11-10",name:"Limits and Derivatives",classLevel:"11",sequence:10},
+    {id:"math11-11",name:"Statistics",classLevel:"11",sequence:11},
+    {id:"math11-12",name:"Probability",classLevel:"11",sequence:12},
+    {id:"math11-13",name:"Trigonometry",classLevel:"11",sequence:13},
+    {id:"math12-1",name:"Matrices",classLevel:"12",sequence:14},
+    {id:"math12-2",name:"Determinants",classLevel:"12",sequence:15},
+    {id:"math12-3",name:"Inverse Trigonometric Functions",classLevel:"12",sequence:16},
+    {id:"math12-4",name:"Continuity and Differentiability",classLevel:"12",sequence:17},
+    {id:"math12-5",name:"Application of Derivatives",classLevel:"12",sequence:18},
+    {id:"math12-6",name:"Integrals",classLevel:"12",sequence:19},
+    {id:"math12-7",name:"Differential Equations",classLevel:"12",sequence:20},
+    {id:"math12-8",name:"Vector Algebra",classLevel:"12",sequence:21},
+    {id:"math12-9",name:"Three Dimensional Geometry",classLevel:"12",sequence:22},
+    {id:"math12-10",name:"Linear Programming",classLevel:"12",sequence:23},
+    {id:"math12-11",name:"Probability (12th)",classLevel:"12",sequence:24}
+  ]
+};
 
-        <div class="card col-6 next-grid" style="align-content: start;">
-          <div class="section-head">
-            <h3>🎯 What to Study Next</h3>
-            <span class="hint">Based on your class &amp; subject.</span>
-          </div>
+/* ── STATE ── */
+const state={name:"",classMode:"11",subject:"physics",completed:{},authUser:null,authType:"Guest"};
 
-          <div class="next-box">
-            <h4 id="nextChapterTitle">No chapter selected yet</h4>
-            <p id="nextChapterMeta">Start marking progress to get recommendations.</p>
-          </div>
+/* ── DOM ── */
+const $=id=>document.getElementById(id);
+const loginScreen=$("loginScreen"),appScreen=$("appScreen");
 
-          <div class="next-box">
-            <h4>📜 Study Sequence</h4>
-            <p id="sequenceText">The ordered list will appear here.</p>
-          </div>
+/* ── LOADER ── */
+window.addEventListener("load",()=>{
+  setTimeout(()=>{
+    const l=$("loader");l.classList.add("out");
+    setTimeout(()=>l.style.display="none",600);
+  },900);
+});
 
-          <div class="next-box">
-            <h4>☁️ Firebase Status</h4>
-            <p id="firebaseStatus"><span class="status-dot dot-blue"></span>Checking...</p>
-          </div>
+/* ── SCREEN ── */
+function showScreen(n){
+  loginScreen.classList.remove("active");appScreen.classList.remove("active");
+  if(n==="login")loginScreen.classList.add("active");
+  if(n==="app")appScreen.classList.add("active");
+}
 
-          <!-- MARK TODAY STUDIED -->
-          <button class="btn btn-primary" style="width:100%;" onclick="markTodayStudied()">
-            ✅ Mark Today as Studied
-          </button>
-        </div>
-      </div>
-
-    </div><!-- /.app -->
-  </section>
-
-  <script type="module">
-  import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
-                                    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { getDatabase, ref, set, get }
-                                    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-
-  /* ── FIREBASE CONFIG ──────────────────────── */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyCUS8TUAsB8clbUcupT9WWM7kiEVZ1PyYg",
-    authDomain:        "bhaiyajee.firebaseapp.com",
-    databaseURL:       "https://bhaiyajee-default-rtdb.firebaseio.com",
-    projectId:         "bhaiyajee",
-    storageBucket:     "bhaiyajee.firebasestorage.app",
-    messagingSenderId: "710710348899",
-    appId:             "1:710710348899:web:30a96012a9c457afc4fc56"
-  };
-
-  let firebaseReady = false, app, auth, db, provider;
-  try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db   = getDatabase(app);
-    provider = new GoogleAuthProvider();
-    firebaseReady = true;
-  } catch (e) { console.error("Firebase init failed:", e); }
-
-  /* ── SYLLABUS ────────────────────────────────────────────── */
-  const syllabus = {
-    physics: [
-      { id:"phy11-1",  name:"Units and Measurements",                             classLevel:"11", sequence:1  },
-      { id:"phy11-2",  name:"Kinematics",                                          classLevel:"11", sequence:2  },
-      { id:"phy11-3",  name:"Laws of Motion",                                     classLevel:"11", sequence:3  },
-      { id:"phy11-4",  name:"Work, Energy and Power",                             classLevel:"11", sequence:4  },
-      { id:"phy11-5",  name:"System of Particles and Rotational Motion",          classLevel:"11", sequence:5  },
-      { id:"phy11-6",  name:"Gravitation",                                         classLevel:"11", sequence:6  },
-      { id:"phy11-7",  name:"Properties of Solids and Liquids",                  classLevel:"11", sequence:7  },
-      { id:"phy11-8",  name:"Thermodynamics",                                     classLevel:"11", sequence:8  },
-      { id:"phy11-9",  name:"Kinetic Theory of Gases",                            classLevel:"11", sequence:9  },
-      { id:"phy11-10", name:"Oscillations and Waves",                             classLevel:"11", sequence:10 },
-      { id:"phy12-1",  name:"Electrostatics",                                     classLevel:"12", sequence:11 },
-      { id:"phy12-2",  name:"Current Electricity",                                classLevel:"12", sequence:12 },
-      { id:"phy12-3",  name:"Magnetic Effects of Current and Magnetism",          classLevel:"12", sequence:13 },
-      { id:"phy12-4",  name:"Electromagnetic Induction and Alternating Current",  classLevel:"12", sequence:14 },
-      { id:"phy12-5",  name:"Electromagnetic Waves",                              classLevel:"12", sequence:15 },
-      { id:"phy12-6",  name:"Optics",                                             classLevel:"12", sequence:16 },
-      { id:"phy12-7",  name:"Dual Nature of Matter and Radiation",               classLevel:"12", sequence:17 },
-      { id:"phy12-8",  name:"Atoms and Nuclei",                                   classLevel:"12", sequence:18 },
-      { id:"phy12-9",  name:"Electronic Devices",                                 classLevel:"12", sequence:19 },
-      { id:"phy12-10", name:"Experimental Skills",                                classLevel:"12", sequence:20 }
-    ],
-    chemistry: [
-      { id:"chem11-1",  name:"Some Basic Concepts of Chemistry",                  classLevel:"11", sequence:1  },
-      { id:"chem11-2",  name:"Atomic Structure",                                  classLevel:"11", sequence:2  },
-      { id:"chem11-3",  name:"Chemical Bonding and Molecular Structure",          classLevel:"11", sequence:3  },
-      { id:"chem11-4",  name:"States of Matter",                                  classLevel:"11", sequence:4  },
-      { id:"chem11-5",  name:"Thermodynamics",                                    classLevel:"11", sequence:5  },
-      { id:"chem11-6",  name:"Equilibrium",                                       classLevel:"11", sequence:6  },
-      { id:"chem11-7",  name:"Redox Reactions",                                   classLevel:"11", sequence:7  },
-      { id:"chem11-8",  name:"Hydrogen",                                          classLevel:"11", sequence:8  },
-      { id:"chem11-9",  name:"The s-Block Element",                               classLevel:"11", sequence:9  },
-      { id:"chem11-10", name:"Some p-Block Elements",                             classLevel:"11", sequence:10 },
-      { id:"chem11-11", name:"Organic Chemistry - Basic Principles & Techniques", classLevel:"11", sequence:11 },
-      { id:"chem11-12", name:"Hydrocarbons",                                      classLevel:"11", sequence:12 },
-      { id:"chem11-13", name:"Environmental Chemistry",                           classLevel:"11", sequence:13 },
-      { id:"chem12-1",  name:"Solid State",                                       classLevel:"12", sequence:14 },
-      { id:"chem12-2",  name:"Solutions",                                         classLevel:"12", sequence:15 },
-      { id:"chem12-3",  name:"Electrochemistry",                                  classLevel:"12", sequence:16 },
-      { id:"chem12-4",  name:"Chemical Kinetics",                                 classLevel:"12", sequence:17 },
-      { id:"chem12-5",  name:"Surface Chemistry",                                 classLevel:"12", sequence:18 },
-      { id:"chem12-6",  name:"General Principles and Processes of Isolation of Elements", classLevel:"12", sequence:19 },
-      { id:"chem12-7",  name:"p-Block Elements",                                  classLevel:"12", sequence:20 },
-      { id:"chem12-8",  name:"d and f Block Elements",                            classLevel:"12", sequence:21 },
-      { id:"chem12-9",  name:"Coordination Compounds",                            classLevel:"12", sequence:22 },
-      { id:"chem12-10", name:"Haloalkanes and Haloarenes",                        classLevel:"12", sequence:23 },
-      { id:"chem12-11", name:"Alcohols, Phenols and Ethers",                     classLevel:"12", sequence:24 },
-      { id:"chem12-12", name:"Aldehydes, Ketones and Carboxylic Acids",          classLevel:"12", sequence:25 },
-      { id:"chem12-13", name:"Organic Compounds Containing Nitrogen",            classLevel:"12", sequence:26 },
-      { id:"chem12-14", name:"Biomolecules",                                      classLevel:"12", sequence:27 },
-      { id:"chem12-15", name:"Polymers",                                          classLevel:"12", sequence:28 },
-      { id:"chem12-16", name:"Chemistry in Everyday Life",                        classLevel:"12", sequence:29 }
-    ],
-    mathematics: [
-      { id:"math11-1",  name:"Sets, Relations and Functions",                     classLevel:"11", sequence:1  },
-      { id:"math11-2",  name:"Complex Numbers and Quadratic Equations",           classLevel:"11", sequence:2  },
-      { id:"math11-3",  name:"Matrices and Determinants (foundation)",            classLevel:"11", sequence:3  },
-      { id:"math11-4",  name:"Permutations and Combinations",                     classLevel:"11", sequence:4  },
-      { id:"math11-5",  name:"Binomial Theorem",                                  classLevel:"11", sequence:5  },
-      { id:"math11-6",  name:"Sequences and Series",                              classLevel:"11", sequence:6  },
-      { id:"math11-7",  name:"Straight Lines",                                    classLevel:"11", sequence:7  },
-      { id:"math11-8",  name:"Conic Sections",                                    classLevel:"11", sequence:8  },
-      { id:"math11-9",  name:"Introduction to Three Dimensional Geometry",        classLevel:"11", sequence:9  },
-      { id:"math11-10", name:"Limits and Derivatives",                            classLevel:"11", sequence:10 },
-      { id:"math11-11", name:"Statistics",                                        classLevel:"11", sequence:11 },
-      { id:"math11-12", name:"Probability",                                       classLevel:"11", sequence:12 },
-      { id:"math11-13", name:"Trigonometry",                                      classLevel:"11", sequence:13 },
-      { id:"math12-1",  name:"Matrices",                                          classLevel:"12", sequence:14 },
-      { id:"math12-2",  name:"Determinants",                                      classLevel:"12", sequence:15 },
-      { id:"math12-3",  name:"Inverse Trigonometric Functions",                   classLevel:"12", sequence:16 },
-      { id:"math12-4",  name:"Continuity and Differentiability",                  classLevel:"12", sequence:17 },
-      { id:"math12-5",  name:"Application of Derivatives",                        classLevel:"12", sequence:18 },
-      { id:"math12-6",  name:"Integrals",                                         classLevel:"12", sequence:19 },
-      { id:"math12-7",  name:"Differential Equations",                            classLevel:"12", sequence:20 },
-      { id:"math12-8",  name:"Vector Algebra",                                    classLevel:"12", sequence:21 },
-      { id:"math12-9",  name:"Three Dimensional Geometry",                        classLevel:"12", sequence:22 },
-      { id:"math12-10", name:"Linear Programming",                                classLevel:"12", sequence:23 },
-      { id:"math12-11", name:"Probability (12th)",                                classLevel:"12", sequence:24 }
-    ]
-  };
-
-  /* ── STATE ────────────────────────────────────────────────── */
-  const state = {
-    name: "", classMode: "11", subject: "physics",
-    completed: {}, authUser: null, authType: "Guest"
-  };
-
-  /* ── DOM REFS ─────────────────────────────────────────────── */
-  const loginScreen       = document.getElementById("loginScreen");
-  const appScreen         = document.getElementById("appScreen");
-  const studentName       = document.getElementById("studentName");
-  const studentClassLogin = document.getElementById("studentClassLogin");
-  const continueGuestBtn  = document.getElementById("continueGuestBtn");
-  const googleLoginBtn    = document.getElementById("googleLoginBtn");
-  const loginStatus       = document.getElementById("loginStatus");
-  const themeBtnLogin     = document.getElementById("themeBtnLogin");
-  const themeBtnApp       = document.getElementById("themeBtnApp");
-  const displayName       = document.getElementById("displayName");
-  const displayAuthType   = document.getElementById("displayAuthType");
-  const displayClass      = document.getElementById("displayClass");
-  const classSelector     = document.getElementById("classSelector");
-  const subjectTabs       = document.getElementById("subjectTabs");
-  const chapterListEl     = document.getElementById("chapterList");
-  const completedEl       = document.getElementById("completedChapters");
-  const remainingEl       = document.getElementById("remainingChapters");
-  const progressPercentEl = document.getElementById("progressPercent");
-  const progressFill      = document.getElementById("progressFill");
-  const progressLabel     = document.getElementById("progressLabel");
-  const motivationText    = document.getElementById("motivationText");
-  const streakCount       = document.getElementById("streakCount");
-  const nextChapterTitle  = document.getElementById("nextChapterTitle");
-  const nextChapterMeta   = document.getElementById("nextChapterMeta");
-  const sequenceText      = document.getElementById("sequenceText");
-  const firebaseStatus    = document.getElementById("firebaseStatus");
-  const saveBtn           = document.getElementById("saveBtn");
-  const loadBtn           = document.getElementById("loadBtn");
-  const logoutBtn         = document.getElementById("logoutBtn");
-
-  /* ── THEME ───────────────────────────────────────────────── */
-  let currentTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", currentTheme);
-
-  function toggleTheme() {
-    currentTheme = currentTheme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", currentTheme);
+/* ── STREAK ── */
+function updateStreak(){
+  const streak=Number(localStorage.getItem("jee_streak")||0);
+  $("streakCount").textContent=streak;
+}
+window.markTodayStudied=function(){
+  const today=new Date().toDateString(),last=localStorage.getItem("jee_lastStudy");
+  let streak=Number(localStorage.getItem("jee_streak")||0);
+  if(last!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    streak=(last===yesterday)?streak+1:1;
+    localStorage.setItem("jee_lastStudy",today);
+    localStorage.setItem("jee_streak",streak);
   }
-  themeBtnLogin.addEventListener("click", toggleTheme);
-  themeBtnApp.addEventListener("click",   toggleTheme);
+  $("streakCount").textContent=streak;
+};
 
-  /* ── LOADER ──────────────────────────────────────────────── */
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      const loader = document.getElementById("loader");
-      loader.classList.add("hidden");
-      setTimeout(() => loader.style.display = "none", 500);
-    }, 800);
+/* ── HELPERS ── */
+function getVisible(s){
+  const all=syllabus[s];
+  if(state.classMode==="dropper")return[...all].sort((a,b)=>a.sequence-b.sequence);
+  return all.filter(c=>c.classLevel===state.classMode).sort((a,b)=>a.sequence-b.sequence);
+}
+const isDone=id=>Boolean(state.completed[id]);
+const getNext=s=>getVisible(s).find(c=>!isDone(c.id))||null;
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+/* ── MOTIVATION ── */
+function motivation(pct){
+  if(pct<10) return "Every legend starts at zero — open that first chapter 📖";
+  if(pct<25) return "Solid start! Small steps build massive momentum 💪";
+  if(pct<50) return "You're warming up. Stay consistent every single day 🔥";
+  if(pct<70) return "Past halfway — you're ahead of most aspirants 🚀";
+  if(pct<90) return "Final stretch! Push through and don't stop now 👑";
+  if(pct<100)return "Almost done — this is where legends are made 🏁";
+  return "YOU finished the entire syllabus. Absolute LEGEND 🏆";
+}
+
+/* ── RENDER ── */
+function renderTabs(){
+  const tabs=[{key:"physics",label:"⚛️ Physics"},{key:"chemistry",label:"🧪 Chemistry"},{key:"mathematics",label:"📐 Maths"}];
+  $("subjectTabs").innerHTML="";
+  tabs.forEach(t=>{
+    const b=document.createElement("button");
+    b.className="tab"+(state.subject===t.key?" active":"");
+    b.textContent=t.label;
+    b.onclick=()=>{state.subject=t.key;renderAll();};
+    $("subjectTabs").appendChild(b);
   });
+}
 
-  /* ── SCREEN SWITCH ───────────────────────────────────────── */
-  function showScreen(name) {
-    loginScreen.classList.remove("active");
-    appScreen.classList.remove("active");
-    if (name === "login") loginScreen.classList.add("active");
-    if (name === "app")   appScreen.classList.add("active");
-  }
-
-  /* ── STREAK ──────────────────────────────────────────────── */
-  function updateStreak() {
-    const today     = new Date().toDateString();
-    const last      = localStorage.getItem("jee_lastStudy");
-    let   streak    = Number(localStorage.getItem("jee_streak") || 0);
-    if (last === today) {
-      // already marked
-    } else {
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      streak = (last === yesterday) ? streak + 1 : streak; // only increment on explicit mark
-      // don't reset here; reset only if 2+ days missed
-    }
-    streakCount.textContent = streak + " days";
-  }
-
-  window.markTodayStudied = function() {
-    const today     = new Date().toDateString();
-    const last      = localStorage.getItem("jee_lastStudy");
-    let   streak    = Number(localStorage.getItem("jee_streak") || 0);
-    if (last !== today) {
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
-      streak = (last === yesterday) ? streak + 1 : 1;
-      localStorage.setItem("jee_lastStudy", today);
-      localStorage.setItem("jee_streak", streak);
-    }
-    streakCount.textContent = streak + " days";
-  };
-
-  /* ── SYLLABUS HELPERS ────────────────────────────────────── */
-  function getVisible(subject) {
-    const all = syllabus[subject];
-    if (state.classMode === "dropper") return [...all].sort((a,b) => a.sequence - b.sequence);
-    return all.filter(ch => ch.classLevel === state.classMode).sort((a,b) => a.sequence - b.sequence);
-  }
-
-  function isDone(id) { return Boolean(state.completed[id]); }
-
-  function getNext(subject) {
-    return getVisible(subject).find(ch => !isDone(ch.id)) || null;
-  }
-
-  /* ── MOTIVATION ──────────────────────────────────────────── */
-  function updateMotivation(pct) {
-    let txt;
-    if      (pct < 10)  txt = "Every legend starts at zero. Open that first chapter 📖";
-    else if (pct < 25)  txt = "Solid start! Small steps build big habits 💪";
-    else if (pct < 50)  txt = "You're warming up. Stay consistent 🔥";
-    else if (pct < 70)  txt = "Past halfway — you're ahead of most students 🚀";
-    else if (pct < 90)  txt = "Final stretch! Push through 👑";
-    else if (pct < 100) txt = "Almost there. Don't stop now 🏁";
-    else                txt = "YOU completed the entire syllabus. Absolute LEGEND 🏆";
-    motivationText.textContent = txt;
-  }
-
-  /* ── RENDER FUNCTIONS ────────────────────────────────────── */
-  function renderSubjectTabs() {
-    const subjects = [
-      { key:"physics",     label:"⚛️ Physics"     },
-      { key:"chemistry",   label:"🧪 Chemistry"   },
-      { key:"mathematics", label:"📐 Mathematics" }
-    ];
-    subjectTabs.innerHTML = "";
-    subjects.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "tab" + (state.subject === item.key ? " active" : "");
-      btn.textContent = item.label;
-      btn.addEventListener("click", () => { state.subject = item.key; renderAll(); });
-      subjectTabs.appendChild(btn);
+function renderChapters(){
+  const visible=getVisible(state.subject),next=getNext(state.subject);
+  const el=$("chapterList");el.innerHTML="";
+  visible.forEach(ch=>{
+    const done=isDone(ch.id),isNext=next&&next.id===ch.id;
+    const row=document.createElement("div");
+    row.className="chapter"+(done?" done":"");
+    row.innerHTML=`
+      <div class="chapter-left">
+        <input type="checkbox" ${done?"checked":""} aria-label="${ch.name}">
+        <div><div class="ch-name">${ch.name}</div><div class="ch-meta">Class ${ch.classLevel} · #${ch.sequence}</div></div>
+      </div>
+      ${done?`<span class="badge badge-done">✓ Done</span>`:isNext?`<span class="badge badge-next">▶ Next</span>`:""}
+    `;
+    row.querySelector("input").addEventListener("change",e=>{
+      state.completed[ch.id]=e.target.checked;
+      saveLocal();renderAll();
     });
-  }
-
-  function renderChapters() {
-    const visible = getVisible(state.subject);
-    const next    = getNext(state.subject);
-    chapterListEl.innerHTML = "";
-
-    visible.forEach(ch => {
-      const done = isDone(ch.id);
-      const isNext = next && next.id === ch.id;
-      const row = document.createElement("div");
-      row.className = "chapter" + (done ? " done" : "");
-
-      row.innerHTML = `
-        <div class="chapter-left">
-          <input type="checkbox" ${done ? "checked" : ""} aria-label="Mark ${ch.name} complete">
-          <div>
-            <h4>${ch.name}</h4>
-            <p>Class ${ch.classLevel} · Seq ${ch.sequence}</p>
-          </div>
-        </div>
-        <div>
-          ${done    ? `<span class="badge badge-done">✓ Done</span>`
-          : isNext  ? `<span class="badge badge-next">▶ Next</span>`
-          : ``}
-        </div>
-      `;
-
-      row.querySelector('input[type="checkbox"]').addEventListener("change", e => {
-        state.completed[ch.id] = e.target.checked;
-        saveLocal();
-        renderAll();
-      });
-
-      chapterListEl.appendChild(row);
-    });
-  }
-
-  function renderStats() {
-    const allVisible = Object.keys(syllabus).flatMap(s => getVisible(s));
-    const total   = allVisible.length;
-    const done    = allVisible.filter(ch => isDone(ch.id)).length;
-    const pct     = total ? Math.round((done / total) * 100) : 0;
-
-    completedEl.textContent       = done;
-    remainingEl.textContent       = total - done;
-    progressPercentEl.textContent = pct + "%";
-    progressFill.style.width      = pct + "%";
-    progressLabel.textContent     = `${done} / ${total} chapters`;
-    updateMotivation(pct);
-  }
-
-  function renderNext() {
-    const visible = getVisible(state.subject);
-    const next    = getNext(state.subject);
-    const subLabel = capitalize(state.subject);
-
-    if (!visible.length) {
-      nextChapterTitle.textContent = "No chapters available";
-      nextChapterMeta.textContent  = "Check class & subject selection.";
-      sequenceText.textContent     = "—";
-      return;
-    }
-
-    sequenceText.textContent = visible.map(ch => ch.name).join(" → ");
-
-    if (!next) {
-      nextChapterTitle.textContent = `🎉 All ${subLabel} chapters done!`;
-      nextChapterMeta.textContent  = `You've finished ${subLabel} for ${state.classMode === "dropper" ? "Dropper" : "Class " + state.classMode}.`;
-    } else {
-      nextChapterTitle.textContent = next.name;
-      nextChapterMeta.textContent  = `${subLabel} · Class ${next.classLevel} · Sequence ${next.sequence}`;
-    }
-  }
-
-  function renderUserInfo() {
-    displayName.textContent     = state.name || "-";
-    displayAuthType.textContent = state.authType;
-    displayClass.textContent    = state.classMode === "dropper" ? "Dropper" : `Class ${state.classMode}`;
-    classSelector.value         = state.classMode;
-  }
-
-  function renderFirebaseStatus() {
-    if (!firebaseReady) {
-      firebaseStatus.innerHTML = `<span class="status-dot dot-red"></span>Firebase not configured. Guest mode only.`;
-    } else if (state.authUser) {
-      firebaseStatus.innerHTML = `<span class="status-dot dot-green"></span>Connected as ${state.authUser.email || "Google user"}. Progress syncs online.`;
-    } else {
-      firebaseStatus.innerHTML = `<span class="status-dot dot-blue"></span>Firebase ready. Login with Google to sync online.`;
-    }
-  }
-
-  function renderAll() {
-    renderUserInfo();
-    renderSubjectTabs();
-    renderChapters();
-    renderStats();
-    renderNext();
-    renderFirebaseStatus();
-    updateStreak();
-  }
-
-  /* ── LOCAL STORAGE ───────────────────────────────────────── */
-  function saveLocal() {
-    localStorage.setItem("jee_completed", JSON.stringify(state.completed));
-    localStorage.setItem("jee_class",     state.classMode);
-    localStorage.setItem("jee_subject",   state.subject);
-    localStorage.setItem("jee_name",      state.name);
-  }
-
-  function loadLocal() {
-    try {
-      state.completed  = JSON.parse(localStorage.getItem("jee_completed") || "{}");
-      state.classMode  = localStorage.getItem("jee_class")   || "11";
-      state.subject    = localStorage.getItem("jee_subject") || "physics";
-      state.name       = localStorage.getItem("jee_name")    || "";
-    } catch(e) {}
-  }
-
-  /* ── FIREBASE SAVE / LOAD ────────────────────────────────── */
-  function getUserPath() {
-    if (state.authUser?.uid) return `users/${state.authUser.uid}/progress`;
-    const key = (state.name||"guest").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_");
-    return `guestUsers/${key}/progress`;
-  }
-
-  async function saveProgress() {
-    if (!firebaseReady) { alert("Firebase not configured."); return; }
-    try {
-      await set(ref(db, getUserPath()), {
-        name: state.name, classMode: state.classMode,
-        subject: state.subject, completed: state.completed,
-        updatedAt: new Date().toISOString()
-      });
-      alert("✅ Progress saved to Firebase!");
-    } catch(e) { console.error(e); alert("Could not save."); }
-  }
-
-  async function loadProgress() {
-    if (!firebaseReady) { alert("Firebase not configured."); return; }
-    try {
-      const snap = await get(ref(db, getUserPath()));
-      if (snap.exists()) {
-        const d = snap.val();
-        state.name      = d.name      || state.name;
-        state.classMode = d.classMode || state.classMode;
-        state.subject   = d.subject   || state.subject;
-        state.completed = d.completed || {};
-        saveLocal();
-        renderAll();
-        alert("📂 Progress loaded!");
-      } else {
-        alert("No saved progress found yet.");
-      }
-    } catch(e) { console.error(e); alert("Could not load."); }
-  }
-
-  saveBtn.addEventListener("click", saveProgress);
-  loadBtn.addEventListener("click", loadProgress);
-
-  /* ── CLASS SELECTOR ──────────────────────────────────────── */
-  classSelector.addEventListener("change", () => {
-    state.classMode = classSelector.value;
-    saveLocal();
-    renderAll();
+    el.appendChild(row);
   });
+}
 
-  /* ── LOGOUT ──────────────────────────────────────────────── */
-  logoutBtn.addEventListener("click", async () => {
-    try { if (firebaseReady && auth && state.authUser) await signOut(auth); } catch(e) {}
-    state.authUser = null; state.authType = "Guest";
-    state.subject = "physics";
-    showScreen("login");
+function renderStats(){
+  const all=Object.keys(syllabus).flatMap(s=>getVisible(s));
+  const total=all.length,done=all.filter(c=>isDone(c.id)).length,pct=total?Math.round(done/total*100):0;
+  $("completedChapters").textContent=done;
+  $("remainingChapters").textContent=total-done;
+  $("progressPercent").textContent=pct+"%";
+  $("progressFill").style.width=pct+"%";
+  $("progressLabel").textContent=`${done} / ${total} chapters`;
+  $("motivationText").textContent=motivation(pct);
+}
+
+function renderNext(){
+  const visible=getVisible(state.subject),next=getNext(state.subject);
+  if(!visible.length){$("nextChapterTitle").textContent="No chapters available";$("nextChapterMeta").textContent="Check class & subject.";$("sequenceText").textContent="—";return;}
+  $("sequenceText").textContent=visible.map(c=>c.name).join(" → ");
+  if(!next){$("nextChapterTitle").textContent=`🎉 All ${cap(state.subject)} done!`;$("nextChapterMeta").textContent="Move to next subject!";}
+  else{$("nextChapterTitle").textContent=next.name;$("nextChapterMeta").textContent=`${cap(state.subject)} · Class ${next.classLevel} · Seq ${next.sequence}`;}
+}
+
+function renderFirebase(){
+  const el=$("firebaseStatus");
+  if(!firebaseReady) el.innerHTML=`<span class="status-dot s-red"></span>Firebase not configured — guest mode only.`;
+  else if(state.authUser) el.innerHTML=`<span class="status-dot s-green"></span>Synced as ${state.authUser.email||"Google user"}`;
+  else el.innerHTML=`<span class="status-dot s-cyan"></span>Firebase ready · Login with Google to sync`;
+}
+
+function renderUser(){
+  $("displayName").textContent=state.name||"—";
+  $("displayAuthType").textContent=state.authType;
+  $("displayClass").textContent=state.classMode==="dropper"?"Dropper":`Class ${state.classMode}`;
+  $("classSelector").value=state.classMode;
+}
+
+function renderAll(){renderUser();renderTabs();renderChapters();renderStats();renderNext();renderFirebase();updateStreak();}
+
+/* ── LOCAL STORAGE ── */
+function saveLocal(){localStorage.setItem("jee_completed",JSON.stringify(state.completed));localStorage.setItem("jee_class",state.classMode);localStorage.setItem("jee_subject",state.subject);localStorage.setItem("jee_name",state.name);}
+function loadLocal(){try{state.completed=JSON.parse(localStorage.getItem("jee_completed")||"{}");state.classMode=localStorage.getItem("jee_class")||"11";state.subject=localStorage.getItem("jee_subject")||"physics";state.name=localStorage.getItem("jee_name")||"";}catch(e){}}
+
+/* ── FIREBASE SAVE/LOAD ── */
+function getUserPath(){if(state.authUser?.uid)return`users/${state.authUser.uid}/progress`;const k=(state.name||"guest").trim().toLowerCase().replace(/[^a-z0-9]+/g,"_");return`guestUsers/${k}/progress`;}
+async function saveProgress(){if(!firebaseReady){alert("Firebase not configured.");return;}try{await set(ref(db,getUserPath()),{name:state.name,classMode:state.classMode,subject:state.subject,completed:state.completed,updatedAt:new Date().toISOString()});alert("✅ Saved to Firebase!");}catch(e){alert("Could not save.");}}
+async function loadProgress(){if(!firebaseReady){alert("Firebase not configured.");return;}try{const snap=await get(ref(db,getUserPath()));if(snap.exists()){const d=snap.val();state.name=d.name||state.name;state.classMode=d.classMode||state.classMode;state.subject=d.subject||state.subject;state.completed=d.completed||{};saveLocal();renderAll();alert("📂 Progress loaded!");}else{alert("No saved progress found.");}}catch(e){alert("Could not load.");}}
+
+$("saveBtn").addEventListener("click",saveProgress);
+$("loadBtn").addEventListener("click",loadProgress);
+$("classSelector").addEventListener("change",()=>{state.classMode=$("classSelector").value;saveLocal();renderAll();});
+$("logoutBtn").addEventListener("click",async()=>{try{if(firebaseReady&&auth&&state.authUser)await signOut(auth);}catch(e){}state.authUser=null;state.authType="Guest";state.subject="physics";showScreen("login");window.switchTab&&switchTab("signin");});
+
+if(firebaseReady&&auth){onAuthStateChanged(auth,u=>{state.authUser=u||null;if(!u&&state.authType!=="Guest")state.authType="Guest";renderFirebase();});}
+
+/* ══════════════════════════════════════════
+   AUTH UI HELPERS
+══════════════════════════════════════════ */
+window.switchTab=function(tab){
+  document.querySelectorAll(".auth-tab").forEach((b,i)=>{
+    b.classList.toggle("active",["signin","signup","guest"][i]===tab);
   });
-
-  /* ── LOGIN ───────────────────────────────────────────────── */
-  continueGuestBtn.addEventListener("click", () => {
-    const name = studentName.value.trim().replace(/\s+/g," ");
-    if (!name) { loginStatus.textContent = "Please enter your name first."; return; }
-    state.name      = name;
-    state.classMode = studentClassLogin.value;
-    state.authType  = "Guest";
-    state.authUser  = null;
-    loadLocal();
-    if (localStorage.getItem("jee_name") === name) {
-      // restore saved completed from local
-    } else {
-      state.completed = {};
-    }
-    saveLocal();
-    showScreen("app");
-    renderAll();
+  ["signin","signup","guest"].forEach(p=>{
+    const el=document.getElementById("panel-"+p);
+    if(el)el.classList.toggle("active",p===tab);
   });
+  document.getElementById("loginStatus").textContent="";
+};
 
-  googleLoginBtn.addEventListener("click", async () => {
-    const name = studentName.value.trim().replace(/\s+/g," ");
-    if (!name) { loginStatus.textContent = "Please enter your name before Google login."; return; }
-    if (!firebaseReady) { loginStatus.textContent = "Firebase not configured."; return; }
-    try {
-      const result = await signInWithPopup(auth, provider);
-      state.authUser  = result.user;
-      state.authType  = "Google";
-      state.name      = name;
-      state.classMode = studentClassLogin.value;
-      showScreen("app");
-      renderAll();
-      await loadProgress();
-    } catch(e) {
-      console.error(e);
-      loginStatus.textContent = "Google login failed. Check Firebase Auth setup.";
-    }
-  });
+window.togglePw=function(id,btn){
+  const inp=document.getElementById(id);
+  inp.type=inp.type==="password"?"text":"password";
+  btn.textContent=inp.type==="password"?"👁":"🙈";
+};
 
-  /* ── AUTH STATE CHANGE ───────────────────────────────────── */
-  if (firebaseReady && auth) {
-    onAuthStateChanged(auth, user => {
-      state.authUser = user || null;
-      if (!user && state.authType !== "Guest") state.authType = "Guest";
-      renderFirebaseStatus();
-    });
-  }
-
-  /* ── HELPERS ─────────────────────────────────────────────── */
-  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-  /* ── BOOT ────────────────────────────────────────────────── */
+function setStatus(msg,ok=false){
+  const el=document.getElementById("loginStatus");
+  el.textContent=msg;el.style.color=ok?"var(--green2)":"var(--red)";
+}
+function setBtnLoading(id,loading,label){
+  const b=document.getElementById(id);if(!b)return;
+  b.disabled=loading;b.textContent=loading?"⏳ Please wait...":label;
+}
+function enterApp(name,classMode,authType){
+  state.name=name;state.classMode=classMode;state.authType=authType;
   loadLocal();
-  renderAll();
-  </script>
+  if(localStorage.getItem("jee_name")!==name)state.completed={};
+  saveLocal();showScreen("app");renderAll();
+}
+
+/* ── EMAIL SIGN IN ── */
+document.getElementById("emailSignInBtn").addEventListener("click",async()=>{
+  const email=document.getElementById("siEmail").value.trim();
+  const pw=document.getElementById("siPassword").value;
+  const cls=document.getElementById("studentClassLogin").value;
+  if(!email||!pw){setStatus("⚠ Enter your email and password.");return;}
+  if(!firebaseReady){setStatus("Firebase not configured.");return;}
+  setBtnLoading("emailSignInBtn",true,"⚡ Sign In");
+  try{
+    const r=await signInWithEmailAndPassword(auth,email,pw);
+    state.authUser=r.user;state.authType="Email";
+    const name=r.user.displayName||email.split("@")[0];
+    enterApp(name,cls,"Email");
+    await loadProgress();
+  }catch(e){
+    const msgs={"auth/user-not-found":"No account found. Sign up first.","auth/wrong-password":"Wrong password.","auth/invalid-credential":"Wrong email or password.","auth/invalid-email":"Invalid email address.","auth/too-many-requests":"Too many attempts. Try later."};
+    setStatus("⚠ "+(msgs[e.code]||e.message));
+  }finally{setBtnLoading("emailSignInBtn",false,"⚡ Sign In");}
+});
+
+/* ── EMAIL SIGN UP ── */
+document.getElementById("emailSignUpBtn").addEventListener("click",async()=>{
+  const name=document.getElementById("suName").value.trim().replace(/\s+/g," ");
+  const email=document.getElementById("suEmail").value.trim();
+  const pw=document.getElementById("suPassword").value;
+  const cls=document.getElementById("studentClassLogin").value;
+  if(!name){setStatus("⚠ Enter your name.");return;}
+  if(!email){setStatus("⚠ Enter your email.");return;}
+  if(pw.length<6){setStatus("⚠ Password must be at least 6 characters.");return;}
+  if(!firebaseReady){setStatus("Firebase not configured.");return;}
+  setBtnLoading("emailSignUpBtn",true,"🚀 Create Account");
+  try{
+    const r=await createUserWithEmailAndPassword(auth,email,pw);
+    await updateProfile(r.user,{displayName:name});
+    state.authUser=r.user;state.authType="Email";
+    setStatus("✅ Account created! Welcome "+name,true);
+    enterApp(name,cls,"Email");
+  }catch(e){
+    const msgs={"auth/email-already-in-use":"Email already registered. Sign in instead.","auth/invalid-email":"Invalid email.","auth/weak-password":"Password too weak (min 6 chars)."};
+    setStatus("⚠ "+(msgs[e.code]||e.message));
+  }finally{setBtnLoading("emailSignUpBtn",false,"🚀 Create Account");}
+});
+
+/* ── GOOGLE LOGIN (popup → redirect fallback) ── */
+document.getElementById("googleSignInBtn").addEventListener("click",async()=>{
+  const cls=document.getElementById("studentClassLogin").value;
+  if(!firebaseReady){setStatus("Firebase not configured.");return;}
+  setBtnLoading("googleSignInBtn",true,"Continue with Google");
+  try{
+    const r=await signInWithPopup(auth,provider);
+    state.authUser=r.user;state.authType="Google";
+    const name=r.user.displayName||r.user.email.split("@")[0];
+    enterApp(name,cls,"Google");
+    await loadProgress();
+  }catch(e){
+    if(e.code==="auth/popup-blocked"||e.code==="auth/cancelled-popup-request"){
+      setStatus("Popup blocked — trying redirect...",true);
+      localStorage.setItem("jee_pendingClass",cls);
+      try{await signInWithRedirect(auth,provider);}
+      catch(e2){setStatus("⚠ Redirect failed: "+e2.message);}
+    }else if(e.code==="auth/unauthorized-domain"){
+      setStatus("⚠ Domain not authorized. Add it in Firebase Console → Auth → Authorized Domains.");
+    }else{
+      setStatus("⚠ Google login failed: "+(e.message||e.code));
+    }
+    setBtnLoading("googleSignInBtn",false,"Continue with Google");
+  }
+});
+
+/* ── HANDLE REDIRECT RESULT ── */
+if(firebaseReady&&auth){
+  getRedirectResult(auth).then(r=>{
+    if(r&&r.user){
+      state.authUser=r.user;state.authType="Google";
+      const cls=localStorage.getItem("jee_pendingClass")||"11";
+      localStorage.removeItem("jee_pendingClass");
+      const name=r.user.displayName||r.user.email.split("@")[0];
+      enterApp(name,cls,"Google");
+      loadProgress();
+    }
+  }).catch(e=>console.error("Redirect result:",e));
+}
+
+/* ── GUEST ── */
+document.getElementById("continueGuestBtn").addEventListener("click",()=>{
+  const name=document.getElementById("guestName").value.trim().replace(/\s+/g," ");
+  const cls=document.getElementById("studentClassLogin").value;
+  if(!name){setStatus("⚠ Enter your name.");return;}
+  state.authUser=null;
+  enterApp(name,cls,"Guest");
+});
+
+/* ── BOOT ── */
+loadLocal();renderAll();
+</script>
 </body>
 </html>
