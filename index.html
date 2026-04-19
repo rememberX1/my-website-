@@ -1496,9 +1496,10 @@ function setBtnLoading(id,loading,label){
   b.disabled=loading;b.textContent=loading?"⏳ Please wait...":label;
 }
 function enterApp(name,classMode,authType){
-  state.name=name;state.classMode=classMode;state.authType=authType;
+  state.name=name;state.authType=authType;
   try{localStorage.setItem(SESSION_KEY,"1");}catch(e){}
   loadLocal();
+  state.classMode=classMode; // AFTER loadLocal so localStorage doesn't overwrite the chosen class
   if(localStorage.getItem("jee_name")!==name)state.completed={};
   saveLocal();showScreen("app");renderAll();
 }
