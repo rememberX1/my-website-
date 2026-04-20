@@ -819,6 +819,20 @@ select.styled option{background:var(--bg2);}
 @keyframes flicker{0%,100%{opacity:1;}45%{opacity:0.75;}50%{opacity:1;}55%{opacity:0.8;}}
 .flicker{animation:flicker 2.5s ease-in-out infinite;}
 
+/* ── LECTURE TRACKER ── */
+.lec-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);flex-wrap:wrap;}
+.lec-label{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
+.lec-input{width:48px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.05);color:var(--text);font-size:0.8rem;text-align:center;outline:none;transition:border-color 0.2s;}
+.lec-input:focus{border-color:var(--cyan);}
+.lec-bar-wrap{flex:1;min-width:80px;height:5px;background:rgba(255,255,255,0.07);border-radius:999px;overflow:hidden;}
+.lec-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width 0.4s ease;}
+.lec-pct{font-size:0.72rem;color:var(--cyan);font-family:'Orbitron',monospace;white-space:nowrap;min-width:32px;text-align:right;}
+.chapter-wrap{flex:1;min-width:0;}
+.lec-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;}
+.lec-stat-box{background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:12px;padding:12px;text-align:center;}
+.lec-stat-val{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;color:var(--violet);}
+.lec-stat-lbl{font-size:0.7rem;color:var(--muted);margin-top:4px;letter-spacing:0.08em;text-transform:uppercase;}
+
 /* entrance animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .fade-in{animation:fadeIn 0.5s ease both;}
@@ -1112,6 +1126,34 @@ select.styled option{background:var(--bg2);}
     </div>
   </div>
 
+  <!-- LECTURE STATS -->
+  <div class="card col-12 fade-in d5" style="margin-bottom:16px;">
+    <div class="section-head">
+      <div>
+        <h3>🎬 Lecture Progress</h3>
+        <div class="section-hint" id="batchLabel">Select your batch above to track lectures</div>
+      </div>
+      <span style="font-size:0.8rem;color:var(--muted2);">Enter total &amp; watched lectures per chapter</span>
+    </div>
+    <div class="lec-stats-grid">
+      <div class="lec-stat-box">
+        <div class="lec-stat-val" id="lecWatched">0</div>
+        <div class="lec-stat-lbl">Lectures watched</div>
+      </div>
+      <div class="lec-stat-box">
+        <div class="lec-stat-val" id="lecTotal" style="color:var(--muted2);">0</div>
+        <div class="lec-stat-lbl">Total lectures</div>
+      </div>
+      <div class="lec-stat-box">
+        <div class="lec-stat-val" id="lecPct" style="color:var(--green2);">0%</div>
+        <div class="lec-stat-lbl">Lectures done</div>
+      </div>
+    </div>
+    <div class="progress-track" style="margin-top:14px;">
+      <div class="progress-fill" id="lecFill" style="background:linear-gradient(90deg,var(--violet),var(--cyan));"></div>
+    </div>
+  </div>
+
   <!-- CLASS + SUBJECT SELECTOR -->
   <div class="card col-12 fade-in d5" style="margin-bottom:16px;">
     <div class="section-head">
@@ -1119,7 +1161,19 @@ select.styled option{background:var(--bg2);}
         <h3>Subject &amp; Class</h3>
         <div class="section-hint">11th / 12th shows that class only · Dropper shows all chapters</div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:0.8rem;color:var(--muted);">Batch:</span>
+        <select id="batchSelector" class="styled">
+          <option value="pw_lakshya">PW — Lakshya</option>
+          <option value="pw_arjuna">PW — Arjuna</option>
+          <option value="pw_eklavya">PW — Eklavya</option>
+          <option value="allen_nurture">Allen — Nurture</option>
+          <option value="allen_leader">Allen — Leader</option>
+          <option value="allen_enthusiast">Allen — Enthusiast</option>
+          <option value="aakash">Aakash</option>
+          <option value="unacademy">Unacademy</option>
+          <option value="other">Other / Self Study</option>
+        </select>
         <span style="font-size:0.8rem;color:var(--muted);">Class:</span>
         <select id="classSelector" class="styled">
           <option value="11">Class 11</option>
@@ -1348,7 +1402,7 @@ const syllabus = {
 
 /* ── STATE ── */
 const SESSION_KEY="jee_has_session";
-const state={name:"",classMode:"11",subject:"physics",completed:{},authUser:null,authType:"Guest"};
+const state={name:"",classMode:"11",subject:"physics",completed:{},lectures:{},batch:"pw_lakshya",authUser:null,authType:"Guest"};
 
 /* ── DOM ── */
 const $=id=>document.getElementById(id);
@@ -1436,20 +1490,54 @@ function renderChapters(){
   const el=$("chapterList");el.innerHTML="";
   visible.forEach(ch=>{
     const done=isDone(ch.id),isNext=next&&next.id===ch.id;
+    const lec=state.lectures[ch.id]||{total:0,watched:0};
+    const lecPct=lec.total>0?Math.round((lec.watched/lec.total)*100):0;
     const row=document.createElement("div");
     row.className="chapter"+(done?" done":"");
     row.innerHTML=`
-      <div class="chapter-left">
-        <div class="ch-num">${String(ch.sequence).padStart(2,'0')}</div>
-        <input type="checkbox" ${done?"checked":""} aria-label="${ch.name}">
-        <div><div class="ch-name">${ch.name}</div><div class="ch-meta">Class ${ch.classLevel} · Seq #${ch.sequence}</div></div>
+      <div style="flex:1;min-width:0;">
+        <div class="chapter-left">
+          <div class="ch-num">${String(ch.sequence).padStart(2,'0')}</div>
+          <input type="checkbox" ${done?"checked":""} aria-label="${ch.name}">
+          <div class="chapter-wrap">
+            <div class="ch-name">${ch.name}</div>
+            <div class="ch-meta">Class ${ch.classLevel} · Seq #${ch.sequence}</div>
+          </div>
+          ${done?`<span class="badge badge-done">✓ Done</span>`:isNext?`<span class="badge badge-next">▶ Next</span>`:""}
+        </div>
+        <div class="lec-row">
+          <span class="lec-label">Lectures:</span>
+          <input class="lec-input" type="number" min="0" max="99" placeholder="0" value="${lec.watched||""}" data-field="watched" data-id="${ch.id}" title="Watched">
+          <span class="lec-label">/</span>
+          <input class="lec-input" type="number" min="0" max="99" placeholder="Total" value="${lec.total||""}" data-field="total" data-id="${ch.id}" title="Total">
+          <div class="lec-bar-wrap"><div class="lec-bar-fill" style="width:${lecPct}%"></div></div>
+          <span class="lec-pct">${lec.total>0?lecPct+"%" : "—"}</span>
+        </div>
       </div>
-      ${done?`<span class="badge badge-done">✓ Done</span>`:isNext?`<span class="badge badge-next">▶ Next</span>`:""}
     `;
-    row.querySelector("input").addEventListener("change",e=>{
+    row.querySelector("input[type=checkbox]").addEventListener("change",e=>{
       state.completed[ch.id]=e.target.checked;
       if(e.target.checked) autoMarkStudied();
       triggerAutoSave();renderAll();
+    });
+    row.querySelectorAll(".lec-input").forEach(inp=>{
+      inp.addEventListener("change",e=>{
+        const id=e.target.dataset.id,field=e.target.dataset.field;
+        if(!state.lectures[id])state.lectures[id]={total:0,watched:0};
+        let val=parseInt(e.target.value)||0;
+        state.lectures[id][field]=val;
+        // clamp watched to total
+        if(state.lectures[id].watched>state.lectures[id].total&&state.lectures[id].total>0)
+          state.lectures[id].watched=state.lectures[id].total;
+        triggerAutoSave();renderLectureStats();
+        // update just this row's bar without full re-render
+        const t=state.lectures[id].total,w=state.lectures[id].watched;
+        const p=t>0?Math.round(w/t*100):0;
+        const bar=inp.closest(".lec-row").querySelector(".lec-bar-fill");
+        const pctEl=inp.closest(".lec-row").querySelector(".lec-pct");
+        if(bar)bar.style.width=p+"%";
+        if(pctEl)pctEl.textContent=t>0?p+"%":"—";
+      });
     });
     el.appendChild(row);
   });
@@ -1500,17 +1588,55 @@ function renderUser(){
   $("displayAuthType").textContent=state.authType;
   $("displayClass").textContent=state.classMode==="dropper"?"Dropper":`Class ${state.classMode}`;
   $("classSelector").value=state.classMode;
-  // Show Sync/Restore only for logged-in users
+  const bs=$("batchSelector");if(bs)bs.value=state.batch||"pw_lakshya";
   const loggedIn=Boolean(state.authUser);
   $("saveBtn").style.display=loggedIn?"":"none";
   $("loadBtn").style.display=loggedIn?"":"none";
 }
 
-function renderAll(){renderUser();renderTabs();renderChapters();renderStats();renderNext();renderFirebase();updateStreak();}
+function renderLectureStats(){
+  const allChapters=Object.keys(syllabus).flatMap(s=>getVisible(s));
+  let totalLec=0,watchedLec=0;
+  allChapters.forEach(ch=>{
+    const l=state.lectures[ch.id]||{total:0,watched:0};
+    totalLec+=l.total||0;
+    watchedLec+=l.watched||0;
+  });
+  const pct=totalLec>0?Math.round(watchedLec/totalLec*100):0;
+  const watched$=$("lecWatched"),total$=$("lecTotal"),pct$=$("lecPct"),fill$=$("lecFill");
+  if(watched$)watched$.textContent=watchedLec;
+  if(total$)total$.textContent=totalLec||"—";
+  if(pct$)pct$.textContent=totalLec>0?pct+"%":"—";
+  if(fill$)fill$.style.width=pct+"%";
+
+  // update batch label
+  const batchNames={"pw_lakshya":"PW Lakshya","pw_arjuna":"PW Arjuna","pw_eklavya":"PW Eklavya","allen_nurture":"Allen Nurture","allen_leader":"Allen Leader","allen_enthusiast":"Allen Enthusiast","aakash":"Aakash","unacademy":"Unacademy","other":"Self Study"};
+  const lbl=$("batchLabel");
+  if(lbl)lbl.textContent=`Batch: ${batchNames[state.batch]||state.batch} · Enter total & watched lectures per chapter`;
+}
+
+function renderAll(){renderUser();renderTabs();renderChapters();renderStats();renderNext();renderFirebase();updateStreak();updateCountdown();renderLectureStats();}
+
 
 /* ── LOCAL STORAGE ── */
-function saveLocal(){localStorage.setItem("jee_completed",JSON.stringify(state.completed));localStorage.setItem("jee_class",state.classMode);localStorage.setItem("jee_subject",state.subject);localStorage.setItem("jee_name",state.name);}
-function loadLocal(){try{state.completed=JSON.parse(localStorage.getItem("jee_completed")||"{}");state.classMode=localStorage.getItem("jee_class")||"11";state.subject=localStorage.getItem("jee_subject")||"physics";state.name=localStorage.getItem("jee_name")||"";}catch(e){}}
+function saveLocal(){
+  localStorage.setItem("jee_completed",JSON.stringify(state.completed));
+  localStorage.setItem("jee_class",state.classMode);
+  localStorage.setItem("jee_subject",state.subject);
+  localStorage.setItem("jee_name",state.name);
+  localStorage.setItem("jee_lectures",JSON.stringify(state.lectures));
+  localStorage.setItem("jee_batch",state.batch);
+}
+function loadLocal(){
+  try{
+    state.completed=JSON.parse(localStorage.getItem("jee_completed")||"{}");
+    state.classMode=localStorage.getItem("jee_class")||"11";
+    state.subject=localStorage.getItem("jee_subject")||"physics";
+    state.name=localStorage.getItem("jee_name")||"";
+    state.lectures=JSON.parse(localStorage.getItem("jee_lectures")||"{}");
+    state.batch=localStorage.getItem("jee_batch")||"pw_lakshya";
+  }catch(e){}
+}
 
 /* ── TOAST NOTIFICATION ── */
 function showToast(msg,ok=true){
@@ -1547,6 +1673,7 @@ async function saveToFirebase(silent=false){
     await set(ref(db,getUserPath()),{
       name:state.name,classMode:state.classMode,
       subject:state.subject,completed:state.completed,
+      lectures:state.lectures,batch:state.batch,
       updatedAt:new Date().toISOString()
     });
     if(!silent)showToast("☁️ Saved to cloud!");
@@ -1579,6 +1706,7 @@ async function loadProgress(){
       const d=snap.val();
       state.name=d.name||state.name;state.classMode=d.classMode||state.classMode;
       state.subject=d.subject||state.subject;state.completed=d.completed||{};
+      state.lectures=d.lectures||{};state.batch=d.batch||state.batch;
       saveLocal();renderAll();showToast("📂 Progress loaded!");
     }else{showToast("No saved progress found yet.",false);}
   }catch(e){showToast("Could not load progress.",false);}
@@ -1586,6 +1714,7 @@ async function loadProgress(){
 
 $("saveBtn").addEventListener("click",saveProgress);
 $("loadBtn").addEventListener("click",loadProgress);
+$("batchSelector").addEventListener("change",()=>{state.batch=$("batchSelector").value;saveLocal();renderLectureStats();});
 $("classSelector").addEventListener("change",()=>{state.classMode=$("classSelector").value;triggerAutoSave();renderAll();});
 $("logoutBtn").addEventListener("click",async()=>{try{if(firebaseReady&&auth&&state.authUser)await signOut(auth);}catch(e){}try{localStorage.removeItem(SESSION_KEY);}catch(e){}state.authUser=null;state.authType="Guest";state.subject="physics";showScreen("login");window.switchTab&&switchTab("signin");});
 
